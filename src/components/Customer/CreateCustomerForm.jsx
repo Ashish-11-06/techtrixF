@@ -11,7 +11,9 @@ const CreateCustomerForm = ({ customer, setCustomer }) => {
     };
 
     const onFinish = (values) => {
-        // console.log('Form values:', values);
+        // Ensure customerId is included in the form values
+        const newProductData = { ...values, customerId: newCustomer.customerId };
+        // console.log('Form values:', newProductData);
         // You can handle the submit logic here
     };
 
@@ -66,6 +68,18 @@ const CreateCustomerForm = ({ customer, setCustomer }) => {
                             ]}
                         >
                             <Input value={newCustomer.phoneNumber} onChange={handleInputChange} name="phoneNumber" />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item
+                            label="Company Phone Number"
+                            name="companyPhoneNumber"
+                            rules={[
+                                { required: true, message: 'Please input the company phone number!' },
+                                { pattern: /^[0-9]{10}$/, message: 'Company phone number must be 10 digits' },
+                            ]}
+                        >
+                            <Input value={newCustomer.companyPhoneNumber} onChange={handleInputChange} name="companyPhoneNumber" />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
