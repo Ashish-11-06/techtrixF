@@ -27,14 +27,15 @@ const Quotations = () => {
     const statusFilter = queryParams.get('status');
 
     useEffect(() => {
-      
+    //   console.log('Quotations:', quotations);
         if (!quotations || quotations.length === 0) {
             dispatch(fetchQuotations());
             // console.log('Fetching quotations...');
         }
         // dispatch(fetchTickets()); // Fetch tickets
-    }, [dispatch, location, quotations]);
+    }, [dispatch, location, quotations, isCreateModalVisible]);
 
+   
     useEffect(() => {
         if (error) {
             message.error(`Failed to load quotations: ${error}. Please check backend connectivity.`);
@@ -114,6 +115,17 @@ const Quotations = () => {
         const matchesStatus = statusFilter ? quotation.status === statusFilter : true;
         return matchesSearchText && matchesStatus;
     });
+
+    useEffect(() => {
+        // console.log('Quotations:', quotations);
+          if (filteredQuotations.length === 0) {
+              console.log('Quotations:', quotations);
+              dispatch(fetchQuotations());
+              // console.log('Fetching quotations...');
+          }
+          // dispatch(fetchTickets()); // Fetch tickets
+      }, [isCreateModalVisible]);
+  
 
     const columns = [
         {

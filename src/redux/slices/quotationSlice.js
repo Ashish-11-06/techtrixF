@@ -28,32 +28,21 @@ export const getQuotationById = createAsyncThunk('quotations/getQuotationById', 
     return response.data; // Return the fetched quotation
 });
 
-// export const getQuotationByUserIdAndInitiatedStatus = createAsyncThunk('quotations/getByUserIdAndStatus', async (userId) => {
-//     const response = await quotationApi.getQuotationByUserIdAndInitiatedStatus(userId);
-//      console.log(response);
-//     return response.data; // Return the fetched quotation
-// });
-
 export const getQuotationByUserIdAndInitiatedStatus = createAsyncThunk(
-    'quotations/getByUserIdAndStatus',
+    'quotations2/getByUserIdAndStatus',
     async (userId, { rejectWithValue }) => {
         try {
             const response = await quotationApi.getQuotationByUserIdAndInitiatedStatus(userId);
-
-            // Return the data if the request was successful
             return response.data;
         } catch (error) {
-            // Check if the error has a response and if the status is 404
             if (error.response && error.response.status === 404) {
                 return null;
+                // return rejectWithValue('Not Found');
             }
-
-            // For other errors, return the default error message
             return rejectWithValue(error.message);
         }
     }
 );
-
 
 export const getQuotationByTicketId = createAsyncThunk('quotations/getQuoatationByTicketId', async (ticketId) => {
     try{
@@ -146,13 +135,11 @@ const quotationSlice = createSlice({
             .addCase(getQuotationByUserIdAndInitiatedStatus.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getQuotationByUserIdAndInitiatedStatus.fulfilled, (state, action) => {
+            .addCase(getQuotationByUserIdAndInitiatedStatus.fulfilled, (state) => {
                 state.loading = false;
-                // state.quotations = Array.isArray(action.payload) ? action.payload : []; // Ensure it's an array
             })
-            .addCase(getQuotationByUserIdAndInitiatedStatus.rejected, (state, action) => {
+            .addCase(getQuotationByUserIdAndInitiatedStatus.rejected, (state) => {
                 state.loading = false;
-                // state.error = action.error.message;
             })
 
            .addCase(getQuotationByTicketId.pending, (state) => {
