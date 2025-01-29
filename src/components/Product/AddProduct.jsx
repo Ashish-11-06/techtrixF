@@ -203,9 +203,7 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
                                 <Input />
                             </Form.Item>
                         </Col>
-                    </Row>
-
-                    <Row gutter={16}>
+              
                         <Col span={8}>
                             <Form.Item name="gst" label="GST :" rules={[{ required: true, message: 'Please select GST!' }]}>
                                 <Select placeholder="Select GST">
@@ -216,6 +214,37 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
                             </Form.Item>
                         </Col>
                     </Row>
+                    
+                    {productType === 'Hardware' && (
+    <Row gutter={16}>
+        {/* Serial Number option */}
+
+        <Col span={8}>
+        <Form.Item 
+        name="isSerialNoAllowed"
+            label="Allow Serial No"
+            rules={[{ required: true, message: 'Please select an option!' }]} // Make the radio button required
+        >
+            <Radio.Group value={isSerialNoAllowed} onChange={e => setIsSerialNoAllowed(e.target.value)}>
+                <Radio value={true}>Yes</Radio>
+                <Radio value={false}>No</Radio>
+            </Radio.Group>
+        </Form.Item>
+
+        </Col>
+       
+        {/* Show Serial Number input field if allowed and viaTicketForm is true */}
+        {isSerialNoAllowed && viaTicketForm && (
+            <Form.Item 
+                name="serialNo" 
+                label="Serial Number :" 
+                rules={[{ required: true, message: 'Please enter a serial number!' }]} // Make the serial number input required
+            >
+                <Input />
+            </Form.Item>
+        )}
+    </Row>
+)}
 
                     <Row gutter={16}>
                         <Col span={24}>

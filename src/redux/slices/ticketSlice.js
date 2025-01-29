@@ -103,8 +103,8 @@ const ticketSlice = createSlice({
                 if (state.ticket && state.ticket.ticketId === updatedTicket.ticketId) {
                     state.ticket = updatedTicket;
                 }
-                console.log('Updated Ticket:', updatedTicket);
-                console.log('Updated Tickets:', state.tickets); // Log state.tickets
+                // console.log('Updated Ticket:', updatedTicket);
+                // console.log('Updated Tickets:', state.tickets); // Log state.tickets
             })
             // Builder for fetchTicketByAssighnedToOrCreatedBy
             .addCase(fetchTicketByAssighnedToOrCreatedBy.pending, (state) => {

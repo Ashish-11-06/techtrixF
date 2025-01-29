@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createTicket } from '../../redux/slices/ticketSlice';
 import CustomerFormModal from '../Customer/CustomerFormModal';
 import ProductFormModal from '../Product/AddProduct'
+import { fetchCustomers } from '../../redux/slices/customerSlice'; // Import fetchCustomers action
 
 const { Option } = Select;
 
@@ -39,6 +40,12 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
             setIsSubmitting(false); // Reset submitting state when the form is reopened
         }
     }, [visible]);
+
+    useEffect(() => {
+        if (customers.length === 0 || !customers) {
+            dispatch(fetchCustomers()); // Fetch customers if not found in the store
+        }
+    }, [customers, dispatch]);
 
     const resetForm = () => {
         setSelectedProduct(null);
