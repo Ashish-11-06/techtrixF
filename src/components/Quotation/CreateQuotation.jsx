@@ -288,8 +288,13 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
 
     const handleAddOrEditProduct = () => {
         // Validation Logic
-        if (newProduct.price <= 0 || newProduct.quantity <= 0) {
-            notification.error({ message: 'Please fill price and quantity correctly!' });
+        if (newProduct.price <= 0 ) {
+            notification.error({ message: 'Please fill price correctly!' });
+            return;
+        }
+
+        if (newProduct.quantity <= 0) {
+            notification.error({ message: 'Please fill quantity correctly!' });
             return;
         }
 
@@ -823,7 +828,7 @@ setCustomer(customerResponse);
                                     </Select>
                                 </Form.Item>
                             </Col>
-                            {productType === 'Hardware' && (
+                            {/* {productType === 'Hardware' && ( */}
                                 <Col span={8}>
                                     <Form.Item label="Quantity"
                                         rules={[{ required: true }]}
@@ -838,8 +843,8 @@ setCustomer(customerResponse);
 
 
 
-                            )}
-                            {productType === 'ServiceF' && (
+                            {/* // )} */}
+                            {/* {productType === 'ServiceF' && (
                                 <Col span={8}>
                                     <Form.Item
                                         label="Quantity"
@@ -854,7 +859,7 @@ setCustomer(customerResponse);
                                         />
                                     </Form.Item>
                                 </Col>
-                            )}
+                            )} */}
 
                         </Row>
 

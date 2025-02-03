@@ -45,7 +45,8 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                     onAddCustomer(newCustomer);
                 }
             } else {
-                message.error( error );
+                // console.log(resultAction);
+                message.error(resultAction.payload);
             }
             });
         }
