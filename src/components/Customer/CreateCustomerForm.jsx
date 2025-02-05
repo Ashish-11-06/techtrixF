@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Form, Row, Col, Input, Switch, Button } from 'antd';
+import { fetchCustomers } from '../../redux/slices/customerSlice';
 
 const CreateCustomerForm = ({ customer, setCustomer }) => {
     const [newCustomer, setNewCustomer] = useState(customer);
     const [form] = Form.useForm(); // Create a form instance
 
     const { customers } = useSelector((state) => state.customers);
+
+    if (customers.length === 0) {
+            dispatch(fetchCustomers());
+          }
 
     const existingCompanyNames = customers.map(customer => customer.companyName?.toLowerCase());
     const existingEmailIds = customers.map(customer => customer.email?.toLowerCase());

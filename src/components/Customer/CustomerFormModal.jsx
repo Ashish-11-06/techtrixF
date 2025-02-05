@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Switch, Button, Row, Col, message } from 'antd';
 import { useDispatch } from 'react-redux';
-import { addCustomer, updateCustomer } from '../../redux/slices/customerSlice'; // Import your Redux actions
+import { addCustomer, fetchCustomers, updateCustomer } from '../../redux/slices/customerSlice'; // Import your Redux actions
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -12,10 +12,15 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
 
     const { customers } = useSelector((state) => state.customers);
 
+    if (customers.length === 0) {
+        dispatch(fetchCustomers());
+      }
+    
     const existingCompanyNames = customers.map(customer => customer.companyName?.toLowerCase());
     const existingEmailIds = customers.map(customer => customer.email?.toLowerCase());
 
     console.log(existingEmailIds);
+    console.log(existingCompanyNames);
 
 
     // Reset the form when the modal opens in "add" mode
@@ -79,7 +84,11 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                                 name="companyName"
                                 rules={[
                                     { required: true, message: 'Please enter company name!' },
+                                    ...(mode === 'edit'
+                                        ? [] // Skip validator in edit mode
+                                        : [
                                     {
+
                                         validator: (_, value) => {
                                             if (value && existingCompanyNames.includes(value.toLowerCase())) {
                                                 return Promise.reject(new Error('This company name is already in use!'));
@@ -87,7 +96,8 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                                             return Promise.resolve();
                                         }
                                     }
-                                ]}
+                                ])
+                            ]}
                             >
                                 <Input />
                             </Form.Item>
@@ -138,17 +148,23 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Email" name="email" rules={[
-                                    { required: true, message: 'Please enter Email!' },
-                                    {
-                                        validator: (_, value) => {
-                                            if (value && existingEmailIds.includes(value.toLowerCase())) {
-                                                return Promise.reject(new Error('This Email is already in use!'));
-                                            }
-                                            return Promise.resolve();
-                                        }
-                                    }
-                                ]}>
+                            <Form.Item label="Email" name="email" 
+                           rules={[
+                                                       { required: true, message: 'Please enter Email!' },
+                                                       ...(mode === 'edit'
+                                                           ? [] // Skip validator in edit mode
+                                                           : [
+                                                                 {
+                                                                     validator: (_, value) => {
+                                                                         if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                                                             return Promise.reject(new Error('This Email is already in use!'));
+                                                                         }
+                                                                         return Promise.resolve();
+                                                                     }
+                                                                 }
+                                                             ])
+                                                   ]}
+                                >
                                 <Input />
                             </Form.Item>
                         </Col>

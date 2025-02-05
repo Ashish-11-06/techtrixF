@@ -111,7 +111,14 @@ const UserManagement = () => {
                     <Title level={4} style={{ margin: 0 }}>
                         User Management
                     </Title>
-                    <Button type="primary" onClick={showModal}>Create User</Button>
+                    <Button type="primary" 
+                   onClick={() => {
+                    console.log('clicked');
+                    setSelectedUser(null);
+                    showModal();
+                    // console.log(selectedUser);
+                }}
+                    >Create User</Button>
                 </div>
                 <Card bordered={false}>
                     <Table

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Select, Button, Switch, message, Row, Col } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { createUser, updateUser } from '../../redux/slices/userSlice';
+import { createUser, fetchUsers, updateUser } from '../../redux/slices/userSlice';
 
 const { Option } = Select;
 
@@ -12,6 +12,10 @@ const CreateUserForm = ({ user, onClose }) => {
     const [loading, setLoading] = useState(false);
 
     const { users } = useSelector((state) => state.users);
+
+     if (users.length === 0) {
+            dispatch(fetchUsers());
+          }
 
     const existingEmailIds = users.map(users => users.email?.toLowerCase());
 
@@ -28,6 +32,8 @@ const CreateUserForm = ({ user, onClose }) => {
                 userType: user.userType === 'Admin_User', // Convert to boolean for the Switch
                 isActive: user.isActive, // Set isActive value
             });
+        }else{
+            form.setFieldValue(null);
         }
     }, [user, form]);
 
@@ -65,10 +71,12 @@ const CreateUserForm = ({ user, onClose }) => {
 
             form.resetFields();
             onClose(); // Close the modal after success
+            
         } catch (error) {
             message.error(error.message || 'Failed to save user. Please try again later.');
         } finally {
             setLoading(false);
+            form.resetFields();
         }
     };
 
@@ -108,14 +116,18 @@ const CreateUserForm = ({ user, onClose }) => {
                         name="email"
                         rules={[
                             { required: true, message: 'Please enter Email!' },
-                            {
-                                validator: (_, value) => {
-                                    if (value && existingEmailIds.includes(value.toLowerCase())) {
-                                        return Promise.reject(new Error('This Email is already in use!'));
-                                    }
-                                    return Promise.resolve();
-                                }
-                            }
+                            ...(isEditMode
+                                ? [] // Skip validator in edit mode
+                                : [
+                                      {
+                                          validator: (_, value) => {
+                                              if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                                  return Promise.reject(new Error('This Email is already in use!'));
+                                              }
+                                              return Promise.resolve();
+                                          }
+                                      }
+                                  ])
                         ]}
                     >
                         <Input />
