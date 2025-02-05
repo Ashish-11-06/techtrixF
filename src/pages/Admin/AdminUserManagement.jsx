@@ -109,7 +109,7 @@ const AdminUserManagement = () => {
                 </Card>
                 <Modal
                     title={selectedUser  ? "Edit User" : "Create User"}
-                    visible={isModalVisible}
+                    open={isModalVisible}
                     onCancel={handleCancel}
                     footer={null}
                 >

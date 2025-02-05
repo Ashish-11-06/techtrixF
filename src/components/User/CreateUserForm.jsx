@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Select, Button, Switch, message, Row, Col } from 'antd';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createUser, updateUser } from '../../redux/slices/userSlice';
 
 const { Option } = Select;
@@ -10,6 +10,12 @@ const CreateUserForm = ({ user, onClose }) => {
     const [form] = Form.useForm();
     const isEditMode = Boolean(user); // Determine if it's edit mode
     const [loading, setLoading] = useState(false);
+
+    const { users } = useSelector((state) => state.users);
+
+    const existingEmailIds = users.map(users => users.email?.toLowerCase());
+
+    console.log(existingEmailIds);
 
     const loggedInUser = JSON.parse(localStorage.getItem('user'));
     const userType = loggedInUser.userType;
@@ -52,7 +58,8 @@ const CreateUserForm = ({ user, onClose }) => {
                 if (createUser.fulfilled.match(result)) {
                     message.success('User  added successfully!');
                 } else {
-                    throw new Error(result.error.message + ', try different email or try again later');
+                    // console.log(result.payload);
+                    throw new Error(result.payload);
                 }
             }
 
@@ -100,7 +107,15 @@ const CreateUserForm = ({ user, onClose }) => {
                         label="Email"
                         name="email"
                         rules={[
-                            { required: true, type: 'email', message: 'Please input a valid email!' },
+                            { required: true, message: 'Please enter Email!' },
+                            {
+                                validator: (_, value) => {
+                                    if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                        return Promise.reject(new Error('This Email is already in use!'));
+                                    }
+                                    return Promise.resolve();
+                                }
+                            }
                         ]}
                     >
                         <Input />

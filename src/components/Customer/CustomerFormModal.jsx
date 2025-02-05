@@ -10,9 +10,14 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
     const dispatch = useDispatch(); // Get the dispatch function
     const navigate = useNavigate(); // Get the navigate function
 
-    const { successMessage, error } = useSelector((state) => state.customers);
+    const { customers } = useSelector((state) => state.customers);
 
-    
+    const existingCompanyNames = customers.map(customer => customer.companyName?.toLowerCase());
+    const existingEmailIds = customers.map(customer => customer.email?.toLowerCase());
+
+    console.log(existingEmailIds);
+
+
     // Reset the form when the modal opens in "add" mode
     useEffect(() => {
         if (visible && mode === 'add') {
@@ -26,29 +31,29 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
         if (mode === 'edit') {
             // Update customer API call
             dispatch(updateCustomer({ customerId: customerId, updatedCustomer: values }))
-            .then(() => {
-                message.success('Customer updated successfully!'); 
-                // Close the modal after successful update
-                onCancel();
-            });
+                .then(() => {
+                    message.success('Customer updated successfully!');
+                    // Close the modal after successful update
+                    onCancel();
+                });
         } else {
             // Add customer API call
             dispatch(addCustomer(values))
-        .then((resultAction) => {
-            if (addCustomer.fulfilled.match(resultAction)) {
-                const newCustomer = resultAction.payload;  // Get the newly added customer from the action payload
-                message.success('Customer added successfully!');
-                onCancel();  // Close modal
+                .then((resultAction) => {
+                    if (addCustomer.fulfilled.match(resultAction)) {
+                        const newCustomer = resultAction.payload;  // Get the newly added customer from the action payload
+                        message.success('Customer added successfully!');
+                        onCancel();  // Close modal
 
-                // Trigger the parent callback to inform about the new customer
-                if (onAddCustomer) {
-                    onAddCustomer(newCustomer);
-                }
-            } else {
-                // console.log(resultAction);
-                message.error(resultAction.payload);
-            }
-            });
+                        // Trigger the parent callback to inform about the new customer
+                        if (onAddCustomer) {
+                            onAddCustomer(newCustomer);
+                        }
+                    } else {
+                        // console.log(resultAction);
+                        message.error(resultAction.payload);
+                    }
+                });
         }
     };
 
@@ -69,8 +74,21 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                 >
                     <Row gutter={24}> {/* Set gutter for spacing between columns */}
                         <Col span={12}> {/* First column */}
-                            <Form.Item label="Company name" name="companyName"
-                           rules={[{ required: true, message: 'Please enter company name!' }]}>
+                            <Form.Item
+                                label="Company Name"
+                                name="companyName"
+                                rules={[
+                                    { required: true, message: 'Please enter company name!' },
+                                    {
+                                        validator: (_, value) => {
+                                            if (value && existingCompanyNames.includes(value.toLowerCase())) {
+                                                return Promise.reject(new Error('This company name is already in use!'));
+                                            }
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                ]}
+                            >
                                 <Input />
                             </Form.Item>
                         </Col>
@@ -79,7 +97,7 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                                 <Switch />
                             </Form.Item>
                         </Col>
-                        
+
                         <Col span={12}> {/* First column */}
                             <Form.Item label="First Name" name="firstName" rules={[{ required: true, message: 'Please enter first name!' }]}>
                                 <Input />
@@ -90,10 +108,10 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                                 <Input />
                             </Form.Item>
                         </Col>
-                       
+
                         <Col span={12}>
                             <Form.Item label="Address" name="address"
-                            rules={[{ required: true, message: 'Please enter address!' }]}>
+                                rules={[{ required: true, message: 'Please enter address!' }]}>
                                 <Input />
                             </Form.Item>
                         </Col>
@@ -107,24 +125,34 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                                 <Input />
                             </Form.Item>
                         </Col> */}
-                       
-                       
-                       
+
+
+
                         <Col span={12}>
-                            <Form.Item label="Phone" name="phoneNumber" 
-                            rules={[
-                                { required: true, message: 'Please input phone number!' },
-                                { pattern: /^[0-9]{10}$/, message: 'Phone number must be 10 digits' },
-                              ]}>
+                            <Form.Item label="Phone" name="phoneNumber"
+                                rules={[
+                                    { required: true, message: 'Please input phone number!' },
+                                    { pattern: /^[0-9]{10}$/, message: 'Phone number must be 10 digits' },
+                                ]}>
                                 <Input />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Email" name="email" rules={[{ required: true, type: 'email', message: 'Please enter email address!' }]}>
+                            <Form.Item label="Email" name="email" rules={[
+                                    { required: true, message: 'Please enter Email!' },
+                                    {
+                                        validator: (_, value) => {
+                                            if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                                return Promise.reject(new Error('This Email is already in use!'));
+                                            }
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                ]}>
                                 <Input />
                             </Form.Item>
                         </Col>
-                       
+
                     </Row>
                     <div style={{ textAlign: 'right' }}>
                         <Button type="primary" htmlType="submit">

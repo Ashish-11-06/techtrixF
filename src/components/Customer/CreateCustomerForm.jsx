@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Form, Row, Col, Input, Switch, Button } from 'antd';
 
 const CreateCustomerForm = ({ customer, setCustomer }) => {
     const [newCustomer, setNewCustomer] = useState(customer);
     const [form] = Form.useForm(); // Create a form instance
+
+    const { customers } = useSelector((state) => state.customers);
+
+    const existingCompanyNames = customers.map(customer => customer.companyName?.toLowerCase());
+    const existingEmailIds = customers.map(customer => customer.email?.toLowerCase());
+
 
     const handleInputChange = (e) => {
         setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value });
@@ -33,7 +40,18 @@ const CreateCustomerForm = ({ customer, setCustomer }) => {
             >
                 <Row gutter={24}>
                     <Col span={12}>
-                        <Form.Item label="Company name" name="companyName" rules={[{ required: true, message: 'Please input the comapany name!' }]}>
+                        <Form.Item label="Company name" name="companyName"  rules={[
+                                                            { required: true, message: 'Please enter company name!' },
+                                                            {
+                                                                validator: (_, value) => {
+                                                                    if (value && existingCompanyNames.includes(value.toLowerCase())) {
+                                                                        return Promise.reject(new Error('This company name is already in use!'));
+                                                                    }
+                                                                    return Promise.resolve();
+                                                                }
+                                                            }
+                                                        ]}
+                                                    >
                             <Input value={newCustomer.companyName} onChange={handleInputChange} name="companyName" />
                         </Form.Item>
                     </Col>
@@ -54,7 +72,17 @@ const CreateCustomerForm = ({ customer, setCustomer }) => {
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="Email" name="email" rules={[{ required: true, type: 'email', message: 'Please input a valid email!' }]}>
+                        <Form.Item label="Email" name="email" rules={[
+                                                            { required: true, message: 'Please enter Email!' },
+                                                            {
+                                                                validator: (_, value) => {
+                                                                    if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                                                        return Promise.reject(new Error('This Email is already in use!'));
+                                                                    }
+                                                                    return Promise.resolve();
+                                                                }
+                                                            }
+                                                        ]}>
                             <Input value={newCustomer.email} onChange={handleInputChange} name="email" />
                         </Form.Item>
                     </Col>
