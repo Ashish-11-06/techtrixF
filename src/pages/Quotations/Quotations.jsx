@@ -119,7 +119,7 @@ const Quotations = () => {
     useEffect(() => {
         // console.log('Quotations:', quotations);
           if (filteredQuotations.length === 0) {
-              console.log('Quotations:', quotations);
+            //   console.log('Quotations:', quotations);
               dispatch(fetchQuotations());
               // console.log('Fetching quotations...');
           }

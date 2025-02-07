@@ -288,7 +288,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
 
     const handleAddOrEditProduct = () => {
         // Validation Logic
-        if (newProduct.price <= 0 ) {
+        if (newProduct.price <= 0) {
             notification.error({ message: 'Please fill price correctly!' });
             return;
         }
@@ -405,14 +405,14 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
 
                 try {
                     // console.log('Adding new customer:', newCustomerData);
-                    const customerResponse = await dispatch(addCustomer(newCustomerData)).unwrap();
+                    let customerResponse = await dispatch(addCustomer(newCustomerData)).unwrap();
                     // console.log('Customer added:', customerResponse);
                     customerId = customerResponse.customerId;
 
                     const values = {
                         customerId: customerId,
                     };
-setCustomer(customerResponse);
+                    setCustomer(customerResponse);
                     // console.log(Updating ticket with ${NticketId.current} and ${values.data});
                     await dispatch(updateTicket({ ticketId: defticketId || NticketId.current, data: values }));
                 } catch (err) {
@@ -435,6 +435,31 @@ setCustomer(customerResponse);
             // Create new products
             const addedProductIds = []; // Array to hold product IDs to be added to quotationProducts
             const productPromises = addedProducts.map(async (product) => {
+                let customerValid = false; // Flag to track customer validity
+
+                // Check customer validity repeatedly until valid or a timeout occurs (optional)
+                const maxAttempts = 5; // Example: Try up to 5 times
+                let attempts = 0;
+
+                while (!customerValid && attempts < maxAttempts) {
+                    // Re-fetch or re-check customer data here.  How you do this depends on your setup.
+                    // Example 1: If 'customer' is a variable that might be updated:
+                    if (customer !== null) {
+                        customerValid = true;
+                    }
+
+                    if (!customerValid) {
+                        attempts++;
+                        console.log("Customer not yet available. Retrying...");
+                        // await new Promise(resolve => setTimeout(resolve, 500)); // Small delay before retrying (optional)
+                    }
+                }
+
+                if (!customerValid) {
+                    console.error("Customer data not found after multiple attempts. Skipping product.");
+                    //   return null; // Or throw an error if you want to stop processing
+                }
+
                 const newProductData = {
                     brand: product.brand,
                     modelNo: product.modelNo,
@@ -448,13 +473,14 @@ setCustomer(customerResponse);
                     gst: product.gst,
                     warrantyMonths: product.warranty,
                     productType: product.productType === 'ServiceF' ? 'Service' : product.productType,
-                    customerId: customer.customerId // Pass customerId in the product data
+                    customerId: customer.customerId || customerResponse // Now 'customer' is guaranteed to be valid
                 };
 
                 const addedProduct = await dispatch(addProduct(newProductData)).unwrap();
-                addedProductIds.push(addedProduct.productId); // Push the newly added product's ID
+                addedProductIds.push(addedProduct.productId);
                 return addedProduct;
             });
+
 
             const addedProductsResponse = await Promise.all(productPromises);
             // console.log(addedProductsResponse);
@@ -481,21 +507,29 @@ setCustomer(customerResponse);
             // console.log('Quotation updated:', quotationResponse);
 
             // Create entries in quotationProducts table for each product
-            const quotationProductPromises = addedProductIds.map(async (productId, index) => {
-                const quotationProductsData = {
-                    quotationId: quotationResponse.quotationId, // Use the ID from the created or updated quotation
-                    productId: productId,
-                };
+            // const quotationProductPromises = addedProductIds.map(async (productId, index) => {
+            //     const quotationProductsData = {
+            //         quotationId: quotationResponse.quotationId, // Use the ID from the created or updated quotation
+            //         productId: productId,
+            //     };
 
-                // Adding a delay of 0.5 second before each API call
-                if (index > 0) await sleep(500);
+            //     // Adding a delay of 0.5 second before each API call
+            //     if (index > 0) await sleep(500);
 
-                // console.log('Adding quotation product:', quotationProductsData);
-                const quotationProductResponse = await dispatch(addQuotaionProduct(quotationProductsData)).unwrap();
-                return quotationProductResponse;
-            });
+            //     // console.log('Adding quotation product:', quotationProductsData);
+            //     const quotationProductResponse = await dispatch(addQuotaionProduct(quotationProductsData)).unwrap();
+            //     return quotationProductResponse;
+            // });
 
-            const quotationProductsResponses = await Promise.all(quotationProductPromises);
+            const quotationProductsData = addedProductIds.map((productId) => ({
+                quotationId: quotationResponse.quotationId, 
+                productId: productId
+            }));
+            
+            const quotationProductResponse = await dispatch(addQuotaionProduct(quotationProductsData)).unwrap();
+            
+
+            // const quotationProductsResponses = await Promise.all(quotationProductResponse);
             // console.log('Quotation products added:', quotationProductsResponses);
 
             navigate('/Quotations')
