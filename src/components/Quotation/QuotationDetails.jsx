@@ -22,7 +22,16 @@ const QuotationDetailsModal = ({ visible, quotation, onClose }) => {
     const [QuotationData, setQuotationData] = useState(null);
 
     useEffect(() => {
-        setQuotationData(quotation);
+        
+        if (quotation && visible) {
+            setQuotationData(quotation);
+            // console.log(quotation.createdBy);
+            dispatch(fetchUserById(quotation.createdBy))
+                .then((res) => {
+                    preparedBy.current = res.payload.data;
+                    // console.log(preparedBy.current); 
+                })
+        }
     }, [dispatch, visible]);
 
     useEffect(() => {
@@ -33,17 +42,6 @@ const QuotationDetailsModal = ({ visible, quotation, onClose }) => {
     const quotationProducts = quotation ? quotation.quotationProducts : [];
     // console.log(`wwwwwwww ${quotationProducts}`)
 
-    useEffect(() => {
-        if (quotation && visible) {
-            // console.log(quotation.createdBy);
-            dispatch(fetchUserById(quotation.createdBy))
-                .then((res) => {
-                    preparedBy.current = res.payload.data;
-                    // console.log(preparedBy.current); 
-                })
-        }
-
-    }, [dispatch, visible]);
 
     const handleEditQuotation = () => {
         setIsEditModalVisible(true);
