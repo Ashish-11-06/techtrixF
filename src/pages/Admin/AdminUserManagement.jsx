@@ -96,7 +96,13 @@ const AdminUserManagement = () => {
                 <Title level={4} style={{ margin: 0 }}>
                     User Management
                 </Title>
-                <Button type="primary" onClick={showModal}>Create User</Button>
+                <Button type="primary" 
+                onClick={() => {
+                    console.log('clicked');
+                    setSelectedUser(null);
+                    showModal();
+                }}
+                >Create User</Button>
             </div>
             <Card bordered={false}>
                     <Table
@@ -109,7 +115,7 @@ const AdminUserManagement = () => {
                 </Card>
                 <Modal
                     title={selectedUser  ? "Edit User" : "Create User"}
-                    visible={isModalVisible}
+                    open={isModalVisible}
                     onCancel={handleCancel}
                     footer={null}
                 >

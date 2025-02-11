@@ -29,8 +29,14 @@ const UserManagement = () => {
     }, [user, navigate]);
 
     useEffect(() => {
-        dispatch(fetchUsers());
-    }, [dispatch]);
+          
+            if (!users || users.length === 0) {
+                dispatch(fetchUsers());
+                console.log('Fetching users...');
+            }
+            // dispatch(fetchTickets()); // Fetch tickets
+        }, [dispatch, location, users]);
+
 
     // Filter users to exclude those with the role of "Admin"
     const filteredUsers = users.filter(user => user.role !== 'Admin');
@@ -105,7 +111,14 @@ const UserManagement = () => {
                     <Title level={4} style={{ margin: 0 }}>
                         User Management
                     </Title>
-                    <Button type="primary" onClick={showModal}>Create User</Button>
+                    <Button type="primary" 
+                   onClick={() => {
+                    console.log('clicked');
+                    setSelectedUser(null);
+                    showModal();
+                    // console.log(selectedUser);
+                }}
+                    >Create User</Button>
                 </div>
                 <Card bordered={false}>
                     <Table

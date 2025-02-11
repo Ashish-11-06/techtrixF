@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Form, Row, Col, Input, Switch, Button } from 'antd';
+import { fetchCustomers } from '../../redux/slices/customerSlice';
 
 const CreateCustomerForm = ({ customer, setCustomer }) => {
     const [newCustomer, setNewCustomer] = useState(customer);
     const [form] = Form.useForm(); // Create a form instance
+
+    const { customers } = useSelector((state) => state.customers);
+
+    if (customers.length === 0) {
+            dispatch(fetchCustomers());
+          }
+
+    const existingCompanyNames = customers.map(customer => customer.companyName?.toLowerCase());
+    const existingEmailIds = customers.map(customer => customer.email?.toLowerCase());
+
 
     const handleInputChange = (e) => {
         setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value });
@@ -11,7 +23,9 @@ const CreateCustomerForm = ({ customer, setCustomer }) => {
     };
 
     const onFinish = (values) => {
-        // console.log('Form values:', values);
+        // Ensure customerId is included in the form values
+        const newProductData = { ...values, customerId: newCustomer.customerId };
+        // console.log('Form values:', newProductData);
         // You can handle the submit logic here
     };
 
@@ -31,7 +45,18 @@ const CreateCustomerForm = ({ customer, setCustomer }) => {
             >
                 <Row gutter={24}>
                     <Col span={12}>
-                        <Form.Item label="Company name" name="companyName" rules={[{ required: true, message: 'Please input the comapany name!' }]}>
+                        <Form.Item label="Company name" name="companyName"  rules={[
+                                                            { required: true, message: 'Please enter company name!' },
+                                                            {
+                                                                validator: (_, value) => {
+                                                                    if (value && existingCompanyNames.includes(value.toLowerCase())) {
+                                                                        return Promise.reject(new Error('This company name is already in use!'));
+                                                                    }
+                                                                    return Promise.resolve();
+                                                                }
+                                                            }
+                                                        ]}
+                                                    >
                             <Input value={newCustomer.companyName} onChange={handleInputChange} name="companyName" />
                         </Form.Item>
                     </Col>
@@ -52,7 +77,17 @@ const CreateCustomerForm = ({ customer, setCustomer }) => {
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="Email" name="email" rules={[{ required: true, type: 'email', message: 'Please input a valid email!' }]}>
+                        <Form.Item label="Email" name="email" rules={[
+                                                            { required: true, message: 'Please enter Email!' },
+                                                            {
+                                                                validator: (_, value) => {
+                                                                    if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                                                        return Promise.reject(new Error('This Email is already in use!'));
+                                                                    }
+                                                                    return Promise.resolve();
+                                                                }
+                                                            }
+                                                        ]}>
                             <Input value={newCustomer.email} onChange={handleInputChange} name="email" />
                         </Form.Item>
                     </Col>
@@ -66,6 +101,18 @@ const CreateCustomerForm = ({ customer, setCustomer }) => {
                             ]}
                         >
                             <Input value={newCustomer.phoneNumber} onChange={handleInputChange} name="phoneNumber" />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item
+                            label="Company Phone Number"
+                            name="companyPhoneNumber"
+                            rules={[
+                                { required: true, message: 'Please input the company phone number!' },
+                                { pattern: /^[0-9]{10}$/, message: 'Company phone number must be 10 digits' },
+                            ]}
+                        >
+                            <Input value={newCustomer.companyPhoneNumber} onChange={handleInputChange} name="companyPhoneNumber" />
                         </Form.Item>
                     </Col>
                     <Col span={12}>

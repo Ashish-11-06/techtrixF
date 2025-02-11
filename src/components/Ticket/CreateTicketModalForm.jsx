@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Modal, Form, Input, Select, Button, message, Radio } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { createTicket } from '../../redux/slices/ticketSlice';
-import { fetchCustomers } from '../../redux/slices/customerSlice';
-import { fetchProducts } from '../../redux/slices/productSlice';
 import CustomerFormModal from '../Customer/CustomerFormModal';
 import ProductFormModal from '../Product/AddProduct'
+import { fetchCustomers } from '../../redux/slices/customerSlice'; // Import fetchCustomers action
 
 const { Option } = Select;
 
@@ -27,21 +26,26 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
     const [newProduct, setNewProduct] = useState(null); // State to hold newly added product
     const [warrantyDetails, setWarrantyDetails] = useState(null); // State for warranty details
 
-    const loggedInUser = JSON.parse(localStorage.getItem('user')); // Get user from local storage
-    // const loggedInUserName = `${loggedInUser.firstName} ${loggedInUser.lastName}`
+    const { customers } = useSelector((state) => state.customers);
+    const { items: products, nonCustomerProducts } = useSelector((state) => state.products); // Ensure products are taken from state
+    const { users } = useSelector((state) => state.users); // Ensure users are taken from state
+
+    const loggedInUser = JSON.parse(localStorage.getItem('user'))
     const looggedInUserId = loggedInUser.userId;
 
-    const { customers } = useSelector((state) => state.customers);
-    const { items } = useSelector((state) => state.products);
+    useEffect(() => {
+        if (!visible) {
+            resetForm();
+        } else {
+            setIsSubmitting(false); // Reset submitting state when the form is reopened
+        }
+    }, [visible]);
 
     useEffect(() => {
-        if (visible) {
-            dispatch(fetchCustomers());
-            dispatch(fetchProducts());
-        } else {
-            resetForm();
+        if (customers.length === 0 || !customers) {
+            dispatch(fetchCustomers()); // Fetch customers if not found in the store
         }
-    }, [dispatch, visible]);
+    }, [customers, dispatch]);
 
     const resetForm = () => {
         setSelectedProduct(null);
@@ -60,7 +64,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
     };
 
     const handleProductChange = (value) => {
-        const product = items.find((item) => item.productId === value);
+        const product = products.find((item) => item.productId === value);
         setSelectedProduct(product);
 
         if (product) {
@@ -114,7 +118,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
             isChargeable: values.isChargeable !== undefined ? values.isChargeable : true,
             isQuotationCreated: false,
             ticketType: 'Issue',
-            productIds: values.productId ? [values.productId] : [selectedProduct.productId],
+            productIds: values.productId ? [values.productId] : selectedProduct ? [selectedProduct.productId] : [],
             createdDate: currentDate,
         };
 
@@ -135,20 +139,19 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                 setCustomerType('existing'); // Reset customer type to default
                 setIsChargeable(false); // Reset chargeable state
                 setisPremiumCustomer(false); // Reset premium customer state
-
-
             } else {
                 message.error('Failed to create ticket.');
+                setIsSubmitting(false); // Reset submitting state if error occurs
             }
         } catch (error) {
             message.error(`Failed to create ticket: ${error.message}`);
-        } finally {
-            setIsSubmitting(false); // Reset submitting state
+            setIsSubmitting(false); // Reset submitting state if error occurs
         }
     };
 
 
-    const filteredProducts = selectedCustomer ? items.filter((product) => product.customerId === selectedCustomer.customerId) : [];
+    const filteredProducts = selectedCustomer ? products.filter((product) => product.customerId === selectedCustomer.customerId) : [];
+    
 
     const openCustomerForm = () => {
         setCustomerModalVisible(true);
@@ -229,10 +232,10 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                             >
                                 {customers && customers.length > 0 ? (
                                     customers.map(customer => (
-                                        <Option key={customer.customerId} value={customer.customerId} label={`${customer.firstName} ${customer.lastName} ${customer.email} ${customer.phoneNumber} `}>
+                                        <Option key={customer.customerId} value={customer.customerId} label={`${customer.firstName} ${customer.lastName} ${customer.email} ${customer.phoneNumber} ${customer.companyName}  `}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span>{`${customer.firstName} ${customer.lastName}`}</span>
-                                                <span style={{ marginLeft: '10px', color: 'gray' }}>{customer.email}</span>
+                                                <span>{`${customer.companyName}`}</span>
+                                                {/* <span style={{ marginLeft: '10px', color: 'gray' }}>{customer.email}</span> */}
                                             </div>
                                         </Option>
                                     ))
@@ -267,7 +270,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                         </div>
                     )}
 
-                    {customerType === 'existing' &&
+                    {customerType === 'existing' || (customerType === 'new' && newCustomer) ? (
                         <Form.Item
                             name="productId"
                             label="Product :"
@@ -281,7 +284,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                             >
                                 {filteredProducts && filteredProducts.length > 0 ? (
                                     filteredProducts.map(product => (
-                                        <Option key={product.productId} value={product.productId} label={`${product.brand} ${product.modelNo}`}>
+                                        <Option key={product.productId} value={product.productId} label={`${product.brand} ${product.modelNo} ${product.serialNo}`}>
                                             <div>
                                                 <span style={{ marginRight: '10px' }}>Brand: {product.brand}</span>
                                                 <span>Model No: {product.modelNo}</span>
@@ -293,7 +296,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                                 )}
                             </Select>
                         </Form.Item>
-                    }
+                    ) : null}
 
                     {newProduct && (
                         <div style={{ marginTop: '2px', marginBottom: '15px' }}>
@@ -332,16 +335,11 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                         onCancel={() => setProductModalVisible(false)}
                         onAddProduct={handleProductAdded}
                         customerId={selectedCustomer?.customerId}
+                        viaTicketForm={true}
                     />
                     {/* )} */}
 
-                    <Form.Item
-                        name="title"
-                        label="Title :"
-                        rules={[{ required: true, message: 'Please enter the ticket title' }]}
-                    >
-                        <Input placeholder="Enter ticket title" />
-                    </Form.Item>
+                    
 
                     {selectedProduct && ( // Only show if a product is selected
                         <>
@@ -420,11 +418,18 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                             </Select>
                         </Form.Item> */}
 
-
+<Form.Item
+                        name="title"
+                        label="Title :"
+                        rules={[{ required: true, message: 'Please enter the ticket title' }]}
+                    >
+                        <Input placeholder="Enter ticket title" />
+                    </Form.Item>
+                    
                     <Form.Item
                         name="description"
                         label="Description/Remark :"
-                    // rules={[{ required: true, message: 'Add a description' }]}  //removed the compulsion
+                    rules={[{ required: true, message: 'Add a description' }]}  //removed the compulsion
                     >
                         <Input.TextArea
                             rows={2}
@@ -433,7 +438,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
 
                     <Form.Item>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button type="primary" htmlType="submit">
+                            <Button type="primary" htmlType="submit" loading={isSubmitting}>
                                 Submit Ticket
                             </Button>
                         </div>

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input, Select, Button, Switch, message, Row, Col } from 'antd';
-import { useDispatch } from 'react-redux';
-import { createUser, updateUser } from '../../redux/slices/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { createUser, fetchUsers, updateUser } from '../../redux/slices/userSlice';
 
 const { Option } = Select;
 
@@ -9,6 +9,17 @@ const CreateUserForm = ({ user, onClose }) => {
     const dispatch = useDispatch();
     const [form] = Form.useForm();
     const isEditMode = Boolean(user); // Determine if it's edit mode
+    const [loading, setLoading] = useState(false);
+
+    const { users } = useSelector((state) => state.users);
+
+     if (users.length === 0) {
+            dispatch(fetchUsers());
+          }
+
+    const existingEmailIds = users.map(users => users.email?.toLowerCase());
+
+    console.log(existingEmailIds);
 
     const loggedInUser = JSON.parse(localStorage.getItem('user'));
     const userType = loggedInUser.userType;
@@ -19,37 +30,55 @@ const CreateUserForm = ({ user, onClose }) => {
             form.setFieldsValue({
                 ...user,
                 userType: user.userType === 'Admin_User', // Convert to boolean for the Switch
-              
+                isActive: user.isActive, // Set isActive value
             });
+        }else{
+            form.setFieldValue(null);
         }
     }, [user, form]);
 
     const handleSubmit = async (values) => {
-    try {
-        const userData = {
-            ...values,
-            userType: values.userType ? 'Admin_User' : 'Normal_User', // Map boolean to enum
-            role: values.role || userRole, // Ensure the role is included
-        };
+        setLoading(true);
+        try {
+            const userData = {
+                ...values,
+                userType: values.userType ? 'Admin_User' : 'Normal_User', // Map boolean to enum
+                role: values.role || userRole, // Ensure the role is included
+                isActive: values.isActive !== undefined ? values.isActive : true, // Set isActive value
+                
+            };
 
-        if (isEditMode) {
-            await dispatch(updateUser ({ ...userData, userId: user.userId }));
-            message.success('User  updated successfully!');
-        } else {
-            const result = await dispatch(createUser(userData));
-            if (createUser.fulfilled.match(result)) {
-                message.success('User  added successfully!');
-            } else {
-                throw new Error(result.error.message + ', try different email or try again later');
+            if (!values.password) {
+                delete userData.password; // Remove password if not entered
             }
-        }
 
-        form.resetFields();
-        onClose(); // Close the modal after success
-    } catch (error) {
-        message.error(error.message || 'Failed to save user. Please try again later.');
-    }
-};
+            if (userData.userType === null) {
+                userData.userType = 'Normal_User'; // Default to Normal_User if null
+            }
+
+            if (isEditMode) {
+                await dispatch(updateUser ({ ...userData, userId: user.userId }));
+                message.success('User  updated successfully!');
+            } else {
+                const result = await dispatch(createUser(userData));
+                if (createUser.fulfilled.match(result)) {
+                    message.success('User  added successfully!');
+                } else {
+                    // console.log(result.payload);
+                    throw new Error(result.payload);
+                }
+            }
+
+            form.resetFields();
+            onClose(); // Close the modal after success
+            
+        } catch (error) {
+            message.error(error.message || 'Failed to save user. Please try again later.');
+        } finally {
+            setLoading(false);
+            form.resetFields();
+        }
+    };
 
     return (
         <Form
@@ -86,7 +115,19 @@ const CreateUserForm = ({ user, onClose }) => {
                         label="Email"
                         name="email"
                         rules={[
-                            { required: true, type: 'email', message: 'Please input a valid email!' },
+                            { required: true, message: 'Please enter Email!' },
+                            ...(isEditMode
+                                ? [] // Skip validator in edit mode
+                                : [
+                                      {
+                                          validator: (_, value) => {
+                                              if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                                  return Promise.reject(new Error('This Email is already in use!'));
+                                              }
+                                              return Promise.resolve();
+                                          }
+                                      }
+                                  ])
                         ]}
                     >
                         <Input />
@@ -119,52 +160,62 @@ const CreateUserForm = ({ user, onClose }) => {
                                     : 'Select a role'
                             }
                             defaultValue={
-                                userType === 'Admin_User' && userRole === 'Sales'
-                                    ? 'Sales'
-                                    : undefined
-                            } // Use defaultValue instead of value
-                            disabled={userType === 'Admin_User' && userRole === 'Sales'}
+                                userRole !== 'Admin' ? userRole : undefined // Show already selected userRole if not Admin
+                            }
+                            disabled={userRole !== 'Admin'} // Disable if userRole is not Admin
                         >
                             <Option value="Logistics">Logistics</Option>
                             <Option value="Sales">Sales</Option>
                             <Option value="Service_Technical">Service technical</Option>
                         </Select>
                     </Form.Item>
-
-
                 </Col>
-                <Col span={12}>
+                {userRole === 'Admin' && (
+                    <Col span={6}>
+                        <Form.Item
+                            label="User Type"
+                            name="userType"
+                            valuePropName="checked" // Maps to boolean
+                            rules={[{ required: true, message: 'Please select the user type!' }]}
+                        >
+                            <Switch
+                                checked={userType !== 'Admin_User'} // Set to true if it's not Admin_User, else false
+                                checkedChildren="Admin"
+                                unCheckedChildren="Normal User"
+                                disabled={userRole !== 'Admin'} // Disable the switch if the userType is Admin_User
+                            />
+                        </Form.Item>
+                    </Col>
+                )}
+                {user && (
+                    <Col span={6}>
+                        <Form.Item
+                            label="Active"
+                            name="isActive"
+                            valuePropName="checked"
+                        >
+                            <Switch
+                                checkedChildren="Active"
+                                unCheckedChildren="Inactive"
+                            />
+                        </Form.Item>
+                    </Col>
+                )}
+            </Row>
+           
+            <Row gutter={16}>
+                <Col span={24}>
                     <Form.Item
-                        label="User Type"
-                        name="userType"
-                        valuePropName="checked" // Maps to boolean
-                        rules={[{ required: true, message: 'Please select the user type!' }]}
+                        label="Password"
+                        name="password"
+                        rules={isEditMode ? [] : [{ required: true, message: 'Please enter the password!' }]}
                     >
-                        <Switch
-                            checked={userType !== 'Admin_User'} // Set to true if it's not Admin_User, else false
-                            checkedChildren="Admin"
-                            unCheckedChildren="Normal User"
-                            disabled={userRole !== 'Admin'} // Disable the switch if the userType is Admin_User
-                        />
+                        <Input.Password />
                     </Form.Item>
                 </Col>
             </Row>
-            
-            <Row gutter={16}>
-                {/* {!isEditMode && ( */}
-                    <Col span={24}>
-                        <Form.Item
-                            label="Password"
-                            name="password"
-                            rules={[{ required: true, message: 'Please enter the password!' }]}
-                        >
-                            <Input.Password />
-                        </Form.Item>
-                    </Col>
-                {/* )} */}
-            </Row>
             <Form.Item>
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" loading={loading}>
                     {user ? 'Update User' : 'Create User'}
                 </Button>
             </Form.Item>
