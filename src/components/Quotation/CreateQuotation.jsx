@@ -26,11 +26,14 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
     const { customers } = useSelector(state => state.customers); // Assuming customer data is fetched through Redux
     const [customer, setCustomer] = useState(null);
     // const { items: products } = useSelector(state => state.products); // Assuming you have products in your Redux store
-    const [loggedInUserId, setLoggedInUserId] = useState(null);
+
     const [brandsList, setBrandsList] = useState([]);
     const [filteredBrands, setFilteredBrands] = useState([]);
     const [modalList, setModalList] = useState([]);
     const [filteredModals, setFilteredModals] = useState([]);
+
+    const loggedInUser = JSON.parse(localStorage.getItem('user'));
+    const loggedInUserId = loggedInUser.userId;
 
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -71,17 +74,6 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
         );
         setFilteredModals(filtered);
     };
-
-
-    useEffect(() => {
-        // Get user from local storage
-        const loggedInUser = JSON.parse(localStorage.getItem('user'));
-        if (loggedInUser) {
-            setLoggedInUserId(loggedInUser.userId);
-            // console.log(loggedInUser  ${loggedInUserId});
-        }
-    }, []); // Empty dependency array to run only once on mount
-
 
     // console.log('Fetched Products:', products);
     const addProductFormRef = useRef(null);
@@ -133,7 +125,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
     const [payment, setPayment] = useState('');
     const [warrantyOrSupport, setWarrantyOrSupport] = useState('');
     const [transport, setTransport] = useState('');
-    const [validity, setValidity] = useState(0);
+    const [validity, setValidity] = useState(1);
 
     // const [NticketId, setNticketId] = useState(null);
     const NticketId = useRef(null);
@@ -522,12 +514,12 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
             // });
 
             const quotationProductsData = addedProductIds.map((productId) => ({
-                quotationId: quotationResponse.quotationId, 
+                quotationId: quotationResponse.quotationId,
                 productId: productId
             }));
-            
+
             const quotationProductResponse = await dispatch(addQuotaionProduct(quotationProductsData)).unwrap();
-            
+
 
             // const quotationProductsResponses = await Promise.all(quotationProductResponse);
             // console.log('Quotation products added:', quotationProductsResponses);
@@ -863,17 +855,17 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                                 </Form.Item>
                             </Col>
                             {/* {productType === 'Hardware' && ( */}
-                                <Col span={8}>
-                                    <Form.Item label="Quantity"
-                                        rules={[{ required: true }]}
-                                    >
-                                        <Input
-                                            type="number"
-                                            value={newProduct.quantity}
-                                            onChange={e => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
-                                        />
-                                    </Form.Item>
-                                </Col>
+                            <Col span={8}>
+                                <Form.Item label="Quantity"
+                                    rules={[{ required: true }]}
+                                >
+                                    <Input
+                                        type="number"
+                                        value={newProduct.quantity}
+                                        onChange={e => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
+                                    />
+                                </Form.Item>
+                            </Col>
 
 
 
@@ -977,8 +969,39 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Validity (days)" rules={[{ required: true, message: 'Please input validity!' }]}>
-                                <Input type="number" value={validity} onChange={e => setValidity(parseInt(e.target.value))} />
+                            <Form.Item
+                                label="Validity (days)"
+                                rules={[
+                                    { required: true, message: 'Please input validity!' },
+                                    {
+                                        validator: (_, value) => {
+                                            if (value === undefined || value === null || value === '') {
+                                                return Promise.reject(new Error('Please input validity!'));
+                                            }
+                                            if (value < 1) {
+                                                return Promise.reject(new Error('Validity must be at least 1 day!'));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    type="number"
+                                    value={validity}
+                                    onChange={(e) => {
+                                        const newValue = e.target.value;
+                                        if (newValue === '') {
+                                            setValidity(''); // Allow clearing the input
+                                        } else {
+                                            const parsedValue = parseInt(newValue, 10);
+                                            if (!isNaN(parsedValue) && parsedValue >= 1) {
+                                                setValidity(parsedValue);
+                                            }
+                                        }
+                                    }}
+                                    min={1}
+                                />
                             </Form.Item>
                         </Col>
                     </Row>
