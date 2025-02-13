@@ -474,23 +474,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
             };
 
             const quotationResponse = await dispatch(updateQuotation({ quotationId: Quote.current.quotationId, data: quotationData })).unwrap();
-            // console.log('Quotation updated:', quotationResponse);
-
-            // Create entries in quotationProducts table for each product
-            // const quotationProductPromises = addedProductIds.map(async (productId, index) => {
-            //     const quotationProductsData = {
-            //         quotationId: quotationResponse.quotationId, // Use the ID from the created or updated quotation
-            //         productId: productId,
-            //     };
-
-            //     // Adding a delay of 0.5 second before each API call
-            //     if (index > 0) await sleep(500);
-
-            //     // console.log('Adding quotation product:', quotationProductsData);
-            //     const quotationProductResponse = await dispatch(addQuotaionProduct(quotationProductsData)).unwrap();
-            //     return quotationProductResponse;
-            // });
-
+          
             const quotationProductsData = addedProductIds.map((productId) => ({
                 quotationId: quotationResponse.quotationId,
                 productId: productId
