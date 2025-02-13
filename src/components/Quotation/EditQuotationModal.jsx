@@ -234,8 +234,25 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="Validity (in days)" name="validity">
-                            <Input type="number" placeholder="Enter Validity in days"  />
+                        <Form.Item
+                            label="Validity (in days)"
+                            name="validity"
+                            rules={[
+                                {
+                                    required: true, // Ensures the field is not empty
+                                    message: 'Please enter validity in days!',
+                                },
+                                {
+                                    validator: (_, value) => {
+                                        if (value <= 0) {
+                                            return Promise.reject('Validity cannot be negative/zero!');
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
+                            ]}
+                        >
+                            <Input type="number" placeholder="Enter validity in days" />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -279,7 +296,7 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
                 onAddProduct={(product) => {
                     setProductList((prevProducts) => [...prevProducts, product]);
                     setAddProductVisible(false);
-                    
+
                 }}
                 onUpdatedQuotaion={(response) => {
                     setQuotationProducts(response.quotationProducts);
