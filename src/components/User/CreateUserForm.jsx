@@ -173,7 +173,7 @@ const CreateUserForm = ({ user, onClose }) => {
                             label="User Type"
                             name="userType"
                             valuePropName="checked" // Maps to boolean
-                            rules={[{ required: true, message: 'Please select the user type!' }]}
+                            // rules={[{ required: true, message: 'Please select the user type!' }]}
                         >
                             <Switch
                                 checked={userType !== 'Admin_User'} // Set to true if it's not Admin_User, else false
