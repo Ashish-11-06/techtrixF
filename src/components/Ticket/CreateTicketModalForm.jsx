@@ -6,6 +6,7 @@ import { createTicket } from '../../redux/slices/ticketSlice';
 import CustomerFormModal from '../Customer/CustomerFormModal';
 import ProductFormModal from '../Product/AddProduct'
 import { fetchCustomers } from '../../redux/slices/customerSlice'; // Import fetchCustomers action
+import { fetchProducts } from '../../redux/slices/productSlice';
 
 const { Option } = Select;
 
@@ -27,7 +28,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
     const [warrantyDetails, setWarrantyDetails] = useState(null); // State for warranty details
 
     const { customers } = useSelector((state) => state.customers);
-    const { items: products, nonCustomerProducts } = useSelector((state) => state.products); // Ensure products are taken from state
+    const { items: products } = useSelector((state) => state.products); // Ensure products are taken from state
     const { users } = useSelector((state) => state.users); // Ensure users are taken from state
 
     const loggedInUser = JSON.parse(localStorage.getItem('user'))
@@ -41,11 +42,17 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
         }
     }, [visible]);
 
-    useEffect(() => {
-        if (customers.length === 0 || !customers) {
-            dispatch(fetchCustomers()); // Fetch customers if not found in the store
-        }
-    }, [customers, dispatch]);
+    // useEffect(() => {
+    if (customers.length === 0 || !customers) {
+        dispatch(fetchCustomers()); // Fetch customers if not found in the store
+    }
+    // }, [customers, dispatch]);
+
+    // console.log('hello check');
+
+    if (products.length === 0 || !products) {
+        dispatch(fetchProducts()); // Fetch products if not found in the store
+    }
 
     const resetForm = () => {
         setSelectedProduct(null);
@@ -151,7 +158,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
 
 
     const filteredProducts = selectedCustomer ? products.filter((product) => product.customerId === selectedCustomer.customerId) : [];
-    
+
 
     const openCustomerForm = () => {
         setCustomerModalVisible(true);
@@ -339,7 +346,7 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                     />
                     {/* )} */}
 
-                    
+
 
                     {selectedProduct && ( // Only show if a product is selected
                         <>
@@ -418,18 +425,18 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
                             </Select>
                         </Form.Item> */}
 
-<Form.Item
+                    <Form.Item
                         name="title"
                         label="Title :"
                         rules={[{ required: true, message: 'Please enter the ticket title' }]}
                     >
                         <Input placeholder="Enter ticket title" />
                     </Form.Item>
-                    
+
                     <Form.Item
                         name="description"
                         label="Description/Remark :"
-                    rules={[{ required: true, message: 'Add a description' }]}  //removed the compulsion
+                        rules={[{ required: true, message: 'Add a description' }]}  //removed the compulsion
                     >
                         <Input.TextArea
                             rows={2}

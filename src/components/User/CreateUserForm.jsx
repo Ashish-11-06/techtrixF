@@ -13,9 +13,9 @@ const CreateUserForm = ({ user, onClose }) => {
 
     const { users } = useSelector((state) => state.users);
 
-     if (users.length === 0) {
-            dispatch(fetchUsers());
-          }
+    if (users.length === 0) {
+        dispatch(fetchUsers());
+    }
 
     const existingEmailIds = users.map(users => users.email?.toLowerCase());
 
@@ -32,7 +32,7 @@ const CreateUserForm = ({ user, onClose }) => {
                 userType: user.userType === 'Admin_User', // Convert to boolean for the Switch
                 isActive: user.isActive, // Set isActive value
             });
-        }else{
+        } else {
             form.setFieldValue(null);
         }
     }, [user, form]);
@@ -45,7 +45,7 @@ const CreateUserForm = ({ user, onClose }) => {
                 userType: values.userType ? 'Admin_User' : 'Normal_User', // Map boolean to enum
                 role: values.role || userRole, // Ensure the role is included
                 isActive: values.isActive !== undefined ? values.isActive : true, // Set isActive value
-                
+
             };
 
             if (!values.password) {
@@ -57,7 +57,7 @@ const CreateUserForm = ({ user, onClose }) => {
             }
 
             if (isEditMode) {
-                await dispatch(updateUser ({ ...userData, userId: user.userId }));
+                await dispatch(updateUser({ ...userData, userId: user.userId }));
                 message.success('User  updated successfully!');
             } else {
                 const result = await dispatch(createUser(userData));
@@ -71,7 +71,7 @@ const CreateUserForm = ({ user, onClose }) => {
 
             form.resetFields();
             onClose(); // Close the modal after success
-            
+
         } catch (error) {
             message.error(error.message || 'Failed to save user. Please try again later.');
         } finally {
@@ -116,18 +116,15 @@ const CreateUserForm = ({ user, onClose }) => {
                         name="email"
                         rules={[
                             { required: true, message: 'Please enter Email!' },
-                            ...(isEditMode
-                                ? [] // Skip validator in edit mode
-                                : [
-                                      {
-                                          validator: (_, value) => {
-                                              if (value && existingEmailIds.includes(value.toLowerCase())) {
-                                                  return Promise.reject(new Error('This Email is already in use!'));
-                                              }
-                                              return Promise.resolve();
-                                          }
-                                      }
-                                  ])
+                            { type: 'email', message: 'Please enter a valid email address!' }, // Validate email format
+                            {
+                                validator: (_, value) => {
+                                    if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                        return Promise.reject(new Error('This Email is already in use!'));
+                                    }
+                                    return Promise.resolve();
+                                },
+                            },
                         ]}
                     >
                         <Input />
@@ -151,7 +148,7 @@ const CreateUserForm = ({ user, onClose }) => {
                     <Form.Item
                         label="Role"
                         name="role"
-                        // rules={[{ required: true, message: 'Please select a role!' }]}
+                    // rules={[{ required: true, message: 'Please select a role!' }]}
                     >
                         <Select
                             placeholder={
@@ -202,7 +199,7 @@ const CreateUserForm = ({ user, onClose }) => {
                     </Col>
                 )}
             </Row>
-           
+
             <Row gutter={16}>
                 <Col span={24}>
                     <Form.Item
