@@ -17,14 +17,15 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
     const [modalList, setModalList] = useState([]);
     const [filteredModals, setFilteredModals] = useState([]);
 
+    console.log(product);
+
     // Fetch brands from the state (assuming brands are available in productSlice or other slice)
     const { nonCustomerProducts: products } = useSelector((state) => state.products);
 
 
-
     useEffect(() => {
         if (products.length === 0 || !products) {
-            console.log('jkjkjkjkj');
+            // console.log('jkjkjkjkj');
             dispatch(fetchNonCustProducts()); // Fetch products if not found in the store
         }
     }, []);
@@ -60,11 +61,12 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
             setProductType(product.productType || 'Hardware');
             setIsSerialNoAllowed(product.isSerialNoAllowed !== undefined ? product.isSerialNoAllowed : true);
         } else {
+            console.log('hello');
             form.resetFields();
             setProductType('Hardware');
             setIsSerialNoAllowed(true);
         }
-    }, [product, form]);
+    }, [product, form, visible]);
 
     const handleFinish = (values) => {
         setLoading(true);
