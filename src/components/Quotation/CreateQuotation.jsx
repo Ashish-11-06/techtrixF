@@ -463,7 +463,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                 customerId: customerId,
                 status: 'Pending',
                 createdBy: loggedInUserId,
-                createdDate: currentDate.format('YYYY-MM-DD HH:mm:ss'),
+                quotationDate: currentDate.format('YYYY-MM-DDTHH:mm:ss'),
                 comments: comment,
                 taxes,
                 delivery,
