@@ -14,8 +14,8 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
 
     if (customers.length === 0) {
         dispatch(fetchCustomers());
-      }
-    
+    }
+
     const existingCompanyNames = customers.map(customer => customer.companyName?.toLowerCase());
     const existingEmailIds = customers.map(customer => customer.email?.toLowerCase());
 
@@ -87,17 +87,17 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                                     ...(mode === 'edit'
                                         ? [] // Skip validator in edit mode
                                         : [
-                                    {
+                                            {
 
-                                        validator: (_, value) => {
-                                            if (value && existingCompanyNames.includes(value.toLowerCase())) {
-                                                return Promise.reject(new Error('This company name is already in use!'));
+                                                validator: (_, value) => {
+                                                    if (value && existingCompanyNames.includes(value.toLowerCase())) {
+                                                        return Promise.reject(new Error('This company name is already in use!'));
+                                                    }
+                                                    return Promise.resolve();
+                                                }
                                             }
-                                            return Promise.resolve();
-                                        }
-                                    }
-                                ])
-                            ]}
+                                        ])
+                                ]}
                             >
                                 <Input />
                             </Form.Item>
@@ -148,23 +148,23 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Email" name="email" 
-                           rules={[
-                                                       { required: true, message: 'Please enter Email!' },
-                                                       ...(mode === 'edit'
-                                                           ? [] // Skip validator in edit mode
-                                                           : [
-                                                                 {
-                                                                     validator: (_, value) => {
-                                                                         if (value && existingEmailIds.includes(value.toLowerCase())) {
-                                                                             return Promise.reject(new Error('This Email is already in use!'));
-                                                                         }
-                                                                         return Promise.resolve();
-                                                                     }
-                                                                 }
-                                                             ])
-                                                   ]}
-                                >
+                            <Form.Item label="Email" name="email"
+                                rules={[
+                                    { required: true, message: 'Please enter Email!' },
+                                    ...(mode === 'edit'
+                                        ? [] // Skip validator in edit mode
+                                        : [
+                                            {
+                                                validator: (_, value) => {
+                                                    if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                                        return Promise.reject(new Error('This Email is already in use!'));
+                                                    }
+                                                    return Promise.resolve();
+                                                }
+                                            }
+                                        ])
+                                ]}
+                            >
                                 <Input />
                             </Form.Item>
                         </Col>
