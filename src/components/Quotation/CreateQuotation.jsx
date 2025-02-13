@@ -266,6 +266,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
     }, [visible]); // Dependencies for the useEffect hook
 
 
+    // console.log(defaultCustomer);
 
 
     const handleProductSelect = async (value) => {
@@ -424,34 +425,15 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                 await dispatch(updateTicket({ ticketId: NticketId.current, data: values }));
             }
 
+            if (customer === null) {
+                // console.log('wait');
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+            }
+
             // Create new products
             const addedProductIds = []; // Array to hold product IDs to be added to quotationProducts
             const productPromises = addedProducts.map(async (product) => {
-                let customerValid = false; // Flag to track customer validity
-
-                // Check customer validity repeatedly until valid or a timeout occurs (optional)
-                const maxAttempts = 5; // Example: Try up to 5 times
-                let attempts = 0;
-
-                while (!customerValid && attempts < maxAttempts) {
-                    // Re-fetch or re-check customer data here.  How you do this depends on your setup.
-                    // Example 1: If 'customer' is a variable that might be updated:
-                    if (customer !== null) {
-                        customerValid = true;
-                    }
-
-                    if (!customerValid) {
-                        attempts++;
-                        console.log("Customer not yet available. Retrying...");
-                        // await new Promise(resolve => setTimeout(resolve, 500)); // Small delay before retrying (optional)
-                    }
-                }
-
-                if (!customerValid) {
-                    console.error("Customer data not found after multiple attempts. Skipping product.");
-                    //   return null; // Or throw an error if you want to stop processing
-                }
-
+                
                 const newProductData = {
                     brand: product.brand,
                     modelNo: product.modelNo,
@@ -465,7 +447,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                     gst: product.gst,
                     warrantyMonths: product.warranty,
                     productType: product.productType === 'ServiceF' ? 'Service' : product.productType,
-                    customerId: customer.customerId || customerResponse // Now 'customer' is guaranteed to be valid
+                    customerId: customer.customerId || defaultCustomer// Now 'customer' is guaranteed to be valid
                 };
 
                 const addedProduct = await dispatch(addProduct(newProductData)).unwrap();
@@ -475,11 +457,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
 
 
             const addedProductsResponse = await Promise.all(productPromises);
-            // console.log(addedProductsResponse);
-            // console.log(addedProductIds);
-            // console.log(NticketId.current.value);
-
-            // Create a new quotation
+          
             const quotationData = {
                 ticketId: NticketId !== null ? NticketId.current : defticketId,
                 customerId: customerId,
