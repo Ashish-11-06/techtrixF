@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Button, Table, notification, Row, Col } from 'antd';
-import { useDispatch } from 'react-redux';
-import { updateQuotation } from '../../redux/slices/quotationSlice';
-import { updateQuotationProduct, deleteQuotationProduct } from '../../redux/slices/productSlice';
+import { Modal, Form, Input, Button, Table, notification, Row, Col, Select } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { addQuotaionProduct, updateQuotation } from '../../redux/slices/quotationSlice';
+import { updateQuotationProduct, deleteQuotationProduct, addProduct } from '../../redux/slices/productSlice';
 import ProductFormModal from '../Product/AddProduct';
 
 const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
@@ -12,6 +12,9 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
     const [addProductVisible, setAddProductVisible] = useState(false); // State for ProductFormModal visibility
 
     const [quotationProducts, setQuotationProducts] = useState();
+
+
+    const { nonCustomerProducts: productsStorage } = useSelector((state) => state.products);
 
     useEffect(() => {
         if (quotation) {
@@ -193,6 +196,52 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
         setAddProductVisible(true);
     };
 
+    // console.log(quotation.c_customerId);
+
+    const handleProductSelect = async (value) => {
+
+        const selectedProduct = productsStorage.find(product => product.productId === value);
+
+        const productData = {
+            ...selectedProduct,
+            customerId: quotation.c_customerId
+        }
+
+        dispatch(addProduct(productData))
+            .unwrap() // Unwrap the promise to handle errors in a `catch` block
+            .then((addedProduct) => {
+                setProductList((prevProducts) => [...prevProducts, addedProduct]);
+                if (quotation) {
+                    const quotationProductsData = [{
+                        quotationId: quotation.quotationId,
+                        productId: addedProduct.productId,
+                    }];
+
+
+                    dispatch(addQuotaionProduct(quotationProductsData)).unwrap().then(() => {
+                        dispatch(getQuotationById(quotation.quotationId)).unwrap().then((response) => {
+                            setQuotationProducts(response.quotationProducts);
+                        });
+                    });
+                }
+            })
+            .catch((error) => {
+                setLoading(false);
+                console.error("Error adding product:", error);
+                // Handle error (e.g., show toast notification)
+            });
+
+
+
+        // const selectedProduct = productsStorage.find(product => product.productId === value);
+        // if (selectedProduct) {
+        //     const productWithKey = { ...selectedProduct, key: Date.now() }; // Add a unique key for rendering
+        //     setAddedProducts(prev => [...prev, productWithKey]); // Add the selected product to addedProducts
+        //     // console.log(addedProducts);
+        //     notification.success({ message: 'Product added successfully!' });
+        // }
+    };
+
     return (
         <Modal
             title="Update Quotation"
@@ -282,6 +331,32 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
                 >
                     Add New Product
                 </Button>
+
+                <Form.Item label="Select Existing Product">
+                    <Select
+                        showSearch
+                        optionFilterProp="label"
+                        placeholder="Select a product"
+                        onChange={handleProductSelect}
+                        style={{ width: '100%' }}
+                        dropdownStyle={{ maxHeight: 500, overflowY: 'auto' }} // Control dropdown height
+                    >
+                        {productsStorage && productsStorage.length > 0 ? (
+                            productsStorage.map(product => (
+                                <Select.Option
+                                    style={{ width: '100%', color: 'black', border: '1px', padding: '10px', }}
+                                    key={product.productId}
+                                    value={product.productId}
+                                    label={`${product.brand} || ${product.modelNo} || ₹${product.description}`}>
+                                    {product.brand} || {product.modelNo} || ₹{product.description}
+                                </Select.Option>
+                            ))
+                        ) : (
+                            <Select.Option value="">No products found</Select.Option>
+                        )}
+                    </Select>
+                </Form.Item>
+
                 <Form.Item>
                     <Button type="primary" htmlType="submit" style={{ float: 'right' }}>
                         Update Quotation
@@ -300,7 +375,7 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
                 }}
                 onUpdatedQuotaion={(response) => {
                     setQuotationProducts(response.quotationProducts);
-                    console.log('Quotation Products:', response.quotationProducts);
+                    // console.log('Quotation Products:', response.quotationProducts);
                 }}
                 quotation={quotation}
             />

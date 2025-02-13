@@ -96,6 +96,7 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
                 });
         } else {
             // Add new product
+            console.log(productData);
             dispatch(addProduct(productData))
                 .then((resultAction) => {
                     setLoading(false);
