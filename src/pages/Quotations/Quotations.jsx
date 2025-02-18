@@ -163,6 +163,8 @@ const Quotations = () => {
             title: 'Created Date',
             dataIndex: 'quotationDate',
             key: 'quotationDate',
+            sorter: (a, b) => moment(b.quotationDate).unix() - moment(a.quotationDate).unix(),
+            defaultSortOrder: 'descend',
             render: (text) => moment(text).format('DD-MM-YYYY'),
         },
         {

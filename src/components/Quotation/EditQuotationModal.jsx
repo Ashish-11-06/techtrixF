@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button, Table, notification, Row, Col, Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { addQuotaionProduct, updateQuotation } from '../../redux/slices/quotationSlice';
+import { addQuotaionProduct, getQuotationById, updateQuotation } from '../../redux/slices/quotationSlice';
 import { updateQuotationProduct, deleteQuotationProduct, addProduct } from '../../redux/slices/productSlice';
 import ProductFormModal from '../Product/AddProduct';
 
@@ -25,7 +25,8 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
                 payment: quotation.payment,
                 warrantyOrSupport: quotation.warrantyOrSupport,
                 transport: quotation.transport,
-                comments: quotation.comments
+                comments: quotation.comments,
+                validity: quotation.validity,
             });
             setProductList(products);
             setQuotationProducts(quotation.quotationProducts);
@@ -75,7 +76,7 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
     };
 
     const handleDeleteProduct = (productId) => {
-        // console.log('Deleting product:', productId);
+        console.log('Deleting product:', productId);
         const foundProduct = quotationProducts.find(item => item.productId === productId);
         // console.log('Found Product:', foundProduct);
         // console.log('quotationProducts:', quotationProducts);
@@ -304,7 +305,7 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
                             <Input type="number" placeholder="Enter validity in days" />
                         </Form.Item>
                     </Col>
-                </Row>
+                </Row >
                 <h3>Products</h3>
                 <Table
                     columns={productColumns}
@@ -324,38 +325,46 @@ const EditQuotationModal = ({ visible, quotation, onClose, products }) => {
                         </Table.Summary.Row>
                     )}
                 />
-                <Button
-                    type="primary"
-                    style={{ backgroundColor: '#08ba00', borderColor: 'blue', marginTop: '20px' }}
-                    onClick={handleAddProduct} // Ensure you have this function defined
-                >
-                    Add New Product
-                </Button>
+                <Row gutter={16}>
+                    <Col span={8}>
+                        <Button
+                            type="primary"
+                            style={{ backgroundColor: '#08ba00', borderColor: 'blue', marginTop: '20px' }}
+                            onClick={handleAddProduct} // Ensure you have this function defined
+                        >
+                            Add New Product
+                        </Button>
 
-                <Form.Item label="Select Existing Product">
-                    <Select
-                        showSearch
-                        optionFilterProp="label"
-                        placeholder="Select a product"
-                        onChange={handleProductSelect}
-                        style={{ width: '100%' }}
-                        dropdownStyle={{ maxHeight: 500, overflowY: 'auto' }} // Control dropdown height
-                    >
-                        {productsStorage && productsStorage.length > 0 ? (
-                            productsStorage.map(product => (
-                                <Select.Option
-                                    style={{ width: '100%', color: 'black', border: '1px', padding: '10px', }}
-                                    key={product.productId}
-                                    value={product.productId}
-                                    label={`${product.brand} || ${product.modelNo} || ₹${product.description}`}>
-                                    {product.brand} || {product.modelNo} || ₹{product.description}
-                                </Select.Option>
-                            ))
-                        ) : (
-                            <Select.Option value="">No products found</Select.Option>
-                        )}
-                    </Select>
-                </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item label="Select Existing Product to add">
+                            <Select
+                                showSearch
+                                optionFilterProp="label"
+                                placeholder="Select a product"
+                                onChange={handleProductSelect}
+                                style={{ width: '100%' }}
+                                dropdownStyle={{ maxHeight: 500, overflowY: 'auto' }} // Control dropdown height
+                            >
+                                {productsStorage && productsStorage.length > 0 ? (
+                                    productsStorage.map(product => (
+                                        <Select.Option
+                                            style={{ width: '100%', color: 'black', border: '1px', padding: '10px', }}
+                                            key={product.productId}
+                                            value={product.productId}
+                                            label={`${product.brand} || ${product.modelNo} || ₹${product.description}`}>
+                                            {product.brand} || {product.modelNo} || ₹{product.description}
+                                        </Select.Option>
+                                    ))
+                                ) : (
+                                    <Select.Option value="">No products found</Select.Option>
+                                )}
+                            </Select>
+                        </Form.Item>
+
+                    </Col>
+
+                </Row>
 
                 <Form.Item>
                     <Button type="primary" htmlType="submit" style={{ float: 'right' }}>

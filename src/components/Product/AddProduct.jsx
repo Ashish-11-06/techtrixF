@@ -35,7 +35,7 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
         console.log(products);
         if (Array.isArray(products)) {
             // Fetch unique brands
-            console.log('products', products);
+            // console.log('products', products);
             const brands = Array.from(new Set(products.map(product => product.brand)));
             console.log(brands);
             setBrandsList(brands);

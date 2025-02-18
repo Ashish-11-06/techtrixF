@@ -25,6 +25,8 @@ const UpdateProfile = ({ visible, onClose, user, onUpdate }) => {
 
     const handleUpdateProfile = async (values) => {
         const userId = user.userId;
+        // const isActive = true;
+        // const userType = 'Admin_User';
     
         try {
             // Dispatch the updateUser  action and wait for it to complete

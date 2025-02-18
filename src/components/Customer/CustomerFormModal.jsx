@@ -19,8 +19,8 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
     const existingCompanyNames = customers.map(customer => customer.companyName?.toLowerCase());
     const existingEmailIds = customers.map(customer => customer.email?.toLowerCase());
 
-    console.log(existingEmailIds);
-    console.log(existingCompanyNames);
+    // console.log(existingEmailIds);
+    // console.log(existingCompanyNames);
 
 
     // Reset the form when the modal opens in "add" mode
@@ -148,11 +148,14 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Email" name="email"
+                            <Form.Item
+                                label="Email"
+                                name="email"
                                 rules={[
                                     { required: true, message: 'Please enter Email!' },
+                                    { type: 'email', message: 'Please enter a valid email address!' }, // Email format validator
                                     ...(mode === 'edit'
-                                        ? [] // Skip validator in edit mode
+                                        ? [] // Skip duplicate email check in edit mode
                                         : [
                                             {
                                                 validator: (_, value) => {
@@ -160,9 +163,9 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
                                                         return Promise.reject(new Error('This Email is already in use!'));
                                                     }
                                                     return Promise.resolve();
-                                                }
-                                            }
-                                        ])
+                                                },
+                                            },
+                                        ]),
                                 ]}
                             >
                                 <Input />
