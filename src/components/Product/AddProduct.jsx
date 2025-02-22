@@ -17,7 +17,7 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
     const [modalList, setModalList] = useState([]);
     const [filteredModals, setFilteredModals] = useState([]);
 
-    console.log(product);
+    // console.log(product);
 
     // Fetch brands from the state (assuming brands are available in productSlice or other slice)
     const { nonCustomerProducts: products } = useSelector((state) => state.products);
@@ -32,12 +32,12 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
 
 
     useEffect(() => {
-        console.log(products);
+        // console.log(products);
         if (Array.isArray(products)) {
             // Fetch unique brands
             // console.log('products', products);
             const brands = Array.from(new Set(products.map(product => product.brand)));
-            console.log(brands);
+            // console.log(brands);
             setBrandsList(brands);
             setFilteredBrands(brands); // Initially show all brands
             // console.log(products);
@@ -61,7 +61,7 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
             setProductType(product.productType || 'Hardware');
             setIsSerialNoAllowed(product.isSerialNoAllowed !== undefined ? product.isSerialNoAllowed : true);
         } else {
-            console.log('hello');
+            // console.log('hello');
             form.resetFields();
             setProductType('Hardware');
             setIsSerialNoAllowed(true);
@@ -96,7 +96,7 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
                 });
         } else {
             // Add new product
-            console.log(productData);
+            // console.log(productData);
             dispatch(addProduct(productData))
                 .then((resultAction) => {
                     setLoading(false);
@@ -144,8 +144,8 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
         setFilteredModals(filtered);
     };
 
-    console.log('hello from add product edit quotation');
-    console.log(filteredBrands);
+    // console.log('hello from add product edit quotation');
+    // console.log(filteredBrands);
 
 
 

@@ -194,7 +194,7 @@ const Tickets = () => {
             onFilter: (value, record) => record.status === value,
         },
         {
-            title: 'Assighned to',
+            title: 'Assigned to',
             dataIndex: 'assignedTo',
             render: (assignedTo) => {
                 const user = users.find(user => user.userId === assignedTo);

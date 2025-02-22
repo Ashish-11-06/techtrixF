@@ -17,6 +17,7 @@ const UserManagement = () => {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [mode, setMode] = React.useState('add');
 
     const user = JSON.parse(localStorage.getItem('user')); // Get user from local storage
     // console.log(user);
@@ -83,13 +84,14 @@ const UserManagement = () => {
     ];
 
     const showModal = () => {
-        setSelectedUser(null);
+        // setSelectedUser(null);
         setIsModalVisible(true);
     };
 
     const handleEdit = (user) => {
         setSelectedUser(user);
         setIsModalVisible(true);
+        setMode('edit');
     };
 
     const handleCancel = () => {
@@ -113,9 +115,10 @@ const UserManagement = () => {
                     </Title>
                     <Button type="primary" 
                    onClick={() => {
-                    console.log('clicked');
-                    setSelectedUser(null);
+                    // console.log('clicked');
+                    // setSelectedUser(null);
                     showModal();
+                    setMode('add');
                     // console.log(selectedUser);
                 }}
                     >Create User</Button>
@@ -135,7 +138,10 @@ const UserManagement = () => {
                     onCancel={handleCancel}
                     footer={null}
                 >
-                    <CreateUserForm user={selectedUser} onClose={handleCancel} />
+                    <CreateUserForm 
+                    mode={mode}
+                    user={selectedUser} 
+                    onClose={handleCancel} />
                 </Modal>
             </Content>
         </Layout>
