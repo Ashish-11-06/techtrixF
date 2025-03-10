@@ -42,17 +42,18 @@ const CreateTicketModalForm = ({ visible, onClose }) => {
         }
     }, [visible]);
 
-    // useEffect(() => {
+    useEffect(() => {
     if (customers.length === 0 || !customers) {
         dispatch(fetchCustomers()); // Fetch customers if not found in the store
-    }
-    // }, [customers, dispatch]);
-
-    // console.log('hello check');
-
+    } 
     if (products.length === 0 || !products) {
         dispatch(fetchProducts()); // Fetch products if not found in the store
     }
+    }, []);
+
+    // console.log('hello check');
+
+   
 
     const resetForm = () => {
         setSelectedProduct(null);

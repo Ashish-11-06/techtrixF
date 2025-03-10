@@ -77,7 +77,7 @@ const ticketSlice = createSlice({
                 state.error = action.error.message;
             })
             .addCase(createTicket.fulfilled, (state, action) => {
-                state.tickets.push(action.payload);
+                // state.tickets.push(action.payload);
 
             })
             .addCase(fetchTicketDetails.pending, (state) => {

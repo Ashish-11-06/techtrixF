@@ -142,7 +142,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
             }
             dispatch(fetchNonCustProducts()); // Fetch products when the modal is visible
         }
-    }, [dispatch, visible, customers]);
+    }, [visible]);
 
     useEffect(() => {
         if (error) {

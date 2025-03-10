@@ -223,10 +223,10 @@ const QuotationDetailsModal = ({ visible, quotation, onClose }) => {
     justify-content: space-between;">
                     <div style="text-align: left; font-size: 10px; ">
                     <div style="text-align: left; margin-bottom: 15px; font-size: 10px;">
-                        <strong style>Techtrix Solutions Private Limited</strong> </br>
+                        <strong style>TickTool Solutions Private Limited</strong> </br>
                         437 C/6 Narayan Peth Opp. LIC Common Wealth Bldg, </br>
                         Laxmi Road, Pune-411030, Maharashtra, India. </br>
-                        Web: www.techtrix.in | Email: info@techtrix.in </br>
+                        Web: www.TickTool.in | Email: info@TickTool.in </br>
                         Phone No: 020 - 24470788, 24447772 </br>
                     </div>
 
@@ -346,7 +346,7 @@ const QuotationDetailsModal = ({ visible, quotation, onClose }) => {
                         
                          
                         <span style="margin-bottom: -12%">Your’s sincerely,</span></br>
-                        <span style="margin-bottom: -12%">For Techtrix Solutions Pvt. Ltd., </span></br>
+                        <span style="margin-bottom: -12%">For TickTool Solutions Pvt. Ltd., </span></br>
                         <span style="margin-bottom: -12%">  Pune</span></br>
                         <span style="margin-bottom: -12%"> ${preparedBy ? (preparedBy.current ? `${preparedBy.current.firstName} ${preparedBy.current.lastName} ${preparedBy.current.phoneNumber}` : 'N/A') : 'N/A'}
                        </span></br>
@@ -361,7 +361,7 @@ const QuotationDetailsModal = ({ visible, quotation, onClose }) => {
 
                         
                     <div style="text-align: center; font-style: italic; font-size: 10px;">
-                        <p>If you have any questions about this price quote, please contact at helpdesk@techtrix.in</p>
+                        <p>If you have any questions about this price quote, please contact at helpdesk@TickTool.in</p>
                     </div>
                     <div style="text-align: center;     margin-bottom: -2%; font-size: 10px;">
                         <h4 style="font-size: 10px;">Thank You For Your Business!</h4>

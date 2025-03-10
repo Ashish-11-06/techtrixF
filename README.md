@@ -169,7 +169,7 @@ const QuotationDetailsModal = ({ visible, quotation, onClose }) => {
         const pdfContent = document.createElement('div');
         pdfContent.innerHTML = `
             <h1 style="text-align:center;">Quotation</h1>
-        <p style="text-align:center;">Techtrix Solutions Private Limited</p>
+        <p style="text-align:center;">TickTool Solutions Private Limited</p>
         <p style="text-align:center;">437 C/6 Narayan Peth Opp.LIC Common Wealth Bldg, Laxmi Road Pune-411030, Maharashtra, India.</p>
         <p style="text-align:center;">Phone No - 020 - 24470788, 24447772</p>
         <hr />
@@ -210,7 +210,7 @@ const QuotationDetailsModal = ({ visible, quotation, onClose }) => {
         <div style="text-align:center;">
         <h4>Thank You For Your Business!</h4>
         <p>Your’s sincerely,</p>
-        <p>For Techtrix Solutions Pvt. Ltd.</p>
+        <p>For TickTool Solutions Pvt. Ltd.</p>
         <p>Pune</p> 
         </div> `;
         return pdfContent;
@@ -276,9 +276,9 @@ export default QuotationDetailsModal;
         <img src="logo.png" alt="Company Logo" style="max-width: 150px;">
     </div>
     <div style="text-align: left; margin-bottom: 30px;">
-        <p style="margin: 5px 0;"><strong>Techtrix Solutions Private Limited</strong></p>
+        <p style="margin: 5px 0;"><strong>TickTool Solutions Private Limited</strong></p>
         <p style="margin: 5px 0;">437 C/6 Narayan Peth Opp. LIC Common Wealth Bldg, Laxmi Road, Pune-411030, Maharashtra, India.</p>
-        <p style="margin: 5px 0;">Web: www.techtrix.in | Email: info@techtrix.in</p>
+        <p style="margin: 5px 0;">Web: www.TickTool.in | Email: info@TickTool.in</p>
         <p style="margin: 5px 0;">Phone No: 020 - 24470788, 24447772</p>
     </div>
     <div style="text-align: left; margin-bottom: 20px;">
@@ -326,12 +326,12 @@ export default QuotationDetailsModal;
     <div style="text-align: center; margin-top: 40px;">
         <h4 style="font-size: 20px; margin-bottom: 10px;">Thank You For Your Business!</h4>
         <p style="margin: 5px 0;">Your’s sincerely,</p>
-        <p style="margin: 5px 0;">For Techtrix Solutions Pvt. Ltd.</p>
+        <p style="margin: 5px 0;">For TickTool Solutions Pvt. Ltd.</p>
         <p style="margin: 5px 0;">Pune</p>
     </div>
     <hr style="border: none; border-top: 1px solid #000; margin: 30px 0;" />
     <div style="margin-top: 40px; text-align: left; font-style: italic;">
-        <p>If you have any questions about this price quote, please contact Subhash Kandhare at +91 9890180071 or Subhash@techtrix.in</p>
+        <p>If you have any questions about this price quote, please contact Subhash Kandhare at +91 9890180071 or Subhash@TickTool.in</p>
     </div>
 </div>
 </body>

@@ -12,9 +12,11 @@ const CustomerFormModal = ({ visible, onCancel, initialValues, mode, customerId,
 
     const { customers } = useSelector((state) => state.customers);
 
-    if (customers.length === 0) {
+    useEffect(() => {
+    if (customers.length === 0 || !customers) {
         dispatch(fetchCustomers());
     }
+    }, []);
 
     const existingCompanyNames = customers.map(customer => customer.companyName?.toLowerCase());
     const existingEmailIds = customers.map(customer => customer.email?.toLowerCase());
