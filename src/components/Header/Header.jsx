@@ -47,7 +47,7 @@ const CustomHeader = () => {
             zIndex: 10 // Ensure header stays above all other content
         }}>
             <Text strong style={{ fontSize: '18px' }}>
-                Techtrix
+                TickTool
             </Text>
             {user && ( // Conditionally render Space if user exists
                 <Space>

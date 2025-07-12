@@ -33,7 +33,7 @@ const Quotations = () => {
             // console.log('Fetching quotations...');
         }
         // dispatch(fetchTickets()); // Fetch tickets
-    }, [dispatch, location, quotations, isCreateModalVisible]);
+    }, [isCreateModalVisible]);
 
    
     useEffect(() => {
@@ -118,13 +118,13 @@ const Quotations = () => {
 
     useEffect(() => {
         // console.log('Quotations:', quotations);
-          if (filteredQuotations.length === 0) {
+          if (quotations.length === 0 || !quotations) {
             //   console.log('Quotations:', quotations);
-              dispatch(fetchQuotations());
-              // console.log('Fetching quotations...');
+            //   dispatch(fetchQuotations());
+            // console.log('Fetching quotations...');
           }
           // dispatch(fetchTickets()); // Fetch tickets
-      }, [isCreateModalVisible]);
+      }, []);
   
 
     const columns = [
@@ -163,6 +163,8 @@ const Quotations = () => {
             title: 'Created Date',
             dataIndex: 'quotationDate',
             key: 'quotationDate',
+            sorter: (a, b) => moment(b.quotationDate).unix() - moment(a.quotationDate).unix(),
+            defaultSortOrder: 'descend',
             render: (text) => moment(text).format('DD-MM-YYYY'),
         },
         {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Radio, Button, Row, Col, message, Select, AutoComplete } from 'antd';
-import { addProduct, fetchNonCustProducts, updateProduct } from '../../redux/slices/productSlice'; // Redux action
+import { addProduct, fetchNonCustProducts, fetchProducts, updateProduct } from '../../redux/slices/productSlice'; // Redux action
 import { useDispatch, useSelector } from 'react-redux';
 import { addQuotaionProduct, getQuotationById } from '../../redux/slices/quotationSlice';
 
@@ -17,12 +17,25 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
     const [modalList, setModalList] = useState([]);
     const [filteredModals, setFilteredModals] = useState([]);
 
+    // console.log(product);
+
     // Fetch brands from the state (assuming brands are available in productSlice or other slice)
     const { nonCustomerProducts: products } = useSelector((state) => state.products);
 
+
     useEffect(() => {
+        if (products.length === 0 || !products) {
+            // console.log('jkjkjkjkj');
+            dispatch(fetchNonCustProducts()); // Fetch products if not found in the store
+        }
+    }, []);
+
+
+    useEffect(() => {
+        // console.log(products);
         if (Array.isArray(products)) {
             // Fetch unique brands
+            // console.log('products', products);
             const brands = Array.from(new Set(products.map(product => product.brand)));
             // console.log(brands);
             setBrandsList(brands);
@@ -48,11 +61,12 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
             setProductType(product.productType || 'Hardware');
             setIsSerialNoAllowed(product.isSerialNoAllowed !== undefined ? product.isSerialNoAllowed : true);
         } else {
+            // console.log('hello');
             form.resetFields();
             setProductType('Hardware');
             setIsSerialNoAllowed(true);
         }
-    }, [product, form]);
+    }, [product, form, visible]);
 
     const handleFinish = (values) => {
         setLoading(true);
@@ -82,6 +96,7 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
                 });
         } else {
             // Add new product
+            // console.log(productData);
             dispatch(addProduct(productData))
                 .then((resultAction) => {
                     setLoading(false);
@@ -89,11 +104,12 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
                         const addedProduct = resultAction.payload;
                         onAddProduct(addedProduct);
                         if (quotation) {
-                            const quotationProductsData = {
+                            const quotationProductsData = [{
                                 quotationId: quotation.quotationId,
                                 productId: addedProduct.productId,
-                            };
+                            }];
 
+                            
                             dispatch(addQuotaionProduct(quotationProductsData)).unwrap().then(() => {
                                 dispatch(getQuotationById(quotation.quotationId)).unwrap().then((response) => {
                                     onUpdatedQuotaion(response);
@@ -127,6 +143,9 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
         );
         setFilteredModals(filtered);
     };
+
+    // console.log('hello from add product edit quotation');
+    // console.log(filteredBrands);
 
 
 
@@ -217,60 +236,62 @@ const ProductFormModal = ({ visible, onCancel, product, customerId, quotation, v
 
                     {quotation && (
                         <Row gutter={16}>
-                        
-                       
-                         <Col span={8}>
-                         <Form.Item
-                           label="Quantity"
-                           name="quantity"
-                           rules={[
-                             { required: true, message: "Quantity is required" },
-                             { validator: (_, value) => 
-                                 value && value >= 1 
-                                   ? Promise.resolve() 
-                                   : Promise.reject(new Error("Quantity must be at least 1"))
-                             }
-                           ]}
-                           getValueFromEvent={(e) => Number(e.target.value)} // Convert to number
-                         >
-                           <Input
-                             type="number"
-                             onKeyDown={(e) => {
-                               if (e.key === "-" || e.key === "e") {
-                                 e.preventDefault();
-                               }
-                             }}
-                           />
-                         </Form.Item>
-                       </Col>
 
-<Col span={8}>
-<Form.Item
-  label="Price"
-  name="price"
-  rules={[
-    { required: true, message: "price is required" },
-    { validator: (_, value) => 
-        value && value >= 1 
-          ? Promise.resolve() 
-          : Promise.reject(new Error("price must not be negative or zero"))
-    }
-  ]}
-  getValueFromEvent={(e) => Number(e.target.value)} // Convert to number
->
-  <Input
-    type="number"
-    onKeyDown={(e) => {
-      if (e.key === "-" || e.key === "e") {
-        e.preventDefault();
-      }
-    }}
-  />
-</Form.Item>
-</Col>
-</Row>    
+
+                            <Col span={8}>
+                                <Form.Item
+                                    label="Quantity"
+                                    name="quantity"
+                                    rules={[
+                                        { required: true, message: "Quantity is required" },
+                                        {
+                                            validator: (_, value) =>
+                                                value && value >= 1
+                                                    ? Promise.resolve()
+                                                    : Promise.reject(new Error("Quantity must be at least 1"))
+                                        }
+                                    ]}
+                                    getValueFromEvent={(e) => Number(e.target.value)} // Convert to number
+                                >
+                                    <Input
+                                        type="number"
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "e") {
+                                                e.preventDefault();
+                                            }
+                                        }}
+                                    />
+                                </Form.Item>
+                            </Col>
+
+                            <Col span={8}>
+                                <Form.Item
+                                    label="Price"
+                                    name="price"
+                                    rules={[
+                                        { required: true, message: "price is required" },
+                                        {
+                                            validator: (_, value) =>
+                                                value && value >= 1
+                                                    ? Promise.resolve()
+                                                    : Promise.reject(new Error("price must not be negative or zero"))
+                                        }
+                                    ]}
+                                    getValueFromEvent={(e) => Number(e.target.value)} // Convert to number
+                                >
+                                    <Input
+                                        type="number"
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "e") {
+                                                e.preventDefault();
+                                            }
+                                        }}
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
                     )}
-                  
+
                     {productType === 'Hardware' && (
                         <Row gutter={16}>
                             {/* Serial Number option */}

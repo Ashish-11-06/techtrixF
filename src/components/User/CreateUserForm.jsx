@@ -5,7 +5,7 @@ import { createUser, fetchUsers, updateUser } from '../../redux/slices/userSlice
 
 const { Option } = Select;
 
-const CreateUserForm = ({ user, onClose }) => {
+const CreateUserForm = ({ user, onClose, mode }) => {
     const dispatch = useDispatch();
     const [form] = Form.useForm();
     const isEditMode = Boolean(user); // Determine if it's edit mode
@@ -13,29 +13,31 @@ const CreateUserForm = ({ user, onClose }) => {
 
     const { users } = useSelector((state) => state.users);
 
-     if (users.length === 0) {
-            dispatch(fetchUsers());
-          }
+    if (users.length === 0) {
+        dispatch(fetchUsers());
+    }
 
     const existingEmailIds = users.map(users => users.email?.toLowerCase());
 
-    console.log(existingEmailIds);
+    // console.log(existingEmailIds);
 
     const loggedInUser = JSON.parse(localStorage.getItem('user'));
     const userType = loggedInUser.userType;
     const userRole = loggedInUser.role;
 
-    useEffect(() => {
+    if (mode === 'edit') {
         if (user) {
+            // console.log('setting user', user);
             form.setFieldsValue({
                 ...user,
                 userType: user.userType === 'Admin_User', // Convert to boolean for the Switch
                 isActive: user.isActive, // Set isActive value
             });
-        }else{
-            form.setFieldValue(null);
+            // console.log(form)
         }
-    }, [user, form]);
+    } else {
+        form.setFieldValue(null);
+    }
 
     const handleSubmit = async (values) => {
         setLoading(true);
@@ -45,7 +47,7 @@ const CreateUserForm = ({ user, onClose }) => {
                 userType: values.userType ? 'Admin_User' : 'Normal_User', // Map boolean to enum
                 role: values.role || userRole, // Ensure the role is included
                 isActive: values.isActive !== undefined ? values.isActive : true, // Set isActive value
-                
+
             };
 
             if (!values.password) {
@@ -57,7 +59,7 @@ const CreateUserForm = ({ user, onClose }) => {
             }
 
             if (isEditMode) {
-                await dispatch(updateUser ({ ...userData, userId: user.userId }));
+                await dispatch(updateUser({ ...userData, userId: user.userId }));
                 message.success('User  updated successfully!');
             } else {
                 const result = await dispatch(createUser(userData));
@@ -71,7 +73,7 @@ const CreateUserForm = ({ user, onClose }) => {
 
             form.resetFields();
             onClose(); // Close the modal after success
-            
+
         } catch (error) {
             message.error(error.message || 'Failed to save user. Please try again later.');
         } finally {
@@ -116,18 +118,19 @@ const CreateUserForm = ({ user, onClose }) => {
                         name="email"
                         rules={[
                             { required: true, message: 'Please enter Email!' },
-                            ...(isEditMode
-                                ? [] // Skip validator in edit mode
+                            { type: 'email', message: 'Please enter a valid email address!' }, // Email format validator
+                            ...(mode === 'edit'
+                                ? [] // Skip duplicate email check in edit mode
                                 : [
-                                      {
-                                          validator: (_, value) => {
-                                              if (value && existingEmailIds.includes(value.toLowerCase())) {
-                                                  return Promise.reject(new Error('This Email is already in use!'));
-                                              }
-                                              return Promise.resolve();
-                                          }
-                                      }
-                                  ])
+                                    {
+                                        validator: (_, value) => {
+                                            if (value && existingEmailIds.includes(value.toLowerCase())) {
+                                                return Promise.reject(new Error('This Email is already in use!'));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]),
                         ]}
                     >
                         <Input />
@@ -151,7 +154,7 @@ const CreateUserForm = ({ user, onClose }) => {
                     <Form.Item
                         label="Role"
                         name="role"
-                        // rules={[{ required: true, message: 'Please select a role!' }]}
+                    // rules={[{ required: true, message: 'Please select a role!' }]}
                     >
                         <Select
                             placeholder={
@@ -176,7 +179,7 @@ const CreateUserForm = ({ user, onClose }) => {
                             label="User Type"
                             name="userType"
                             valuePropName="checked" // Maps to boolean
-                            rules={[{ required: true, message: 'Please select the user type!' }]}
+                        // rules={[{ required: true, message: 'Please select the user type!' }]}
                         >
                             <Switch
                                 checked={userType !== 'Admin_User'} // Set to true if it's not Admin_User, else false
@@ -202,7 +205,7 @@ const CreateUserForm = ({ user, onClose }) => {
                     </Col>
                 )}
             </Row>
-           
+
             <Row gutter={16}>
                 <Col span={24}>
                     <Form.Item

@@ -9,6 +9,7 @@ import TicketDetailsModal from '../../components/Ticket/TicketDetailsModal';
 import CreateTicketModal from '../../components/Ticket/CreateTicketModalForm'; // Import the CreateTicketModal
 import moment from 'moment'; // Import moment.js for date formatting
 import { useSearchParams } from 'react-router-dom';
+import { WidthFull } from '@mui/icons-material';
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -128,6 +129,7 @@ const Tickets = () => {
             title: 'Ticket ID',
             dataIndex: 'ticketId',
             key: 'ticketId',
+            width: 80,
         },
 
         {
@@ -147,15 +149,27 @@ const Tickets = () => {
             },
         },
         {
-            title: 'title',
+            title: 'Title',
             dataIndex: 'title',
             key: 'title',
+            width: 200, // Adjust this value as needed
+            ellipsis: true, // Enables text truncation with '...'
             render: (text, record) => (
-                <Button type="link" onClick={() => show_modal(record)}>
+                <Button
+                    type="link"
+                    onClick={() => show_modal(record)}
+                    style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '100%',
+                        display: 'inline-block'
+                    }}
+                >
                     {text}
                 </Button>
             ),
-        },
+        },        
         {
             title: 'Created By',
             dataIndex: 'createdById',
@@ -180,7 +194,7 @@ const Tickets = () => {
             onFilter: (value, record) => record.status === value,
         },
         {
-            title: 'Assighned to',
+            title: 'Assigned to',
             dataIndex: 'assignedTo',
             render: (assignedTo) => {
                 const user = users.find(user => user.userId === assignedTo);

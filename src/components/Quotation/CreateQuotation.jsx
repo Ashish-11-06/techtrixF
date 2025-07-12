@@ -26,11 +26,14 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
     const { customers } = useSelector(state => state.customers); // Assuming customer data is fetched through Redux
     const [customer, setCustomer] = useState(null);
     // const { items: products } = useSelector(state => state.products); // Assuming you have products in your Redux store
-    const [loggedInUserId, setLoggedInUserId] = useState(null);
+
     const [brandsList, setBrandsList] = useState([]);
     const [filteredBrands, setFilteredBrands] = useState([]);
     const [modalList, setModalList] = useState([]);
     const [filteredModals, setFilteredModals] = useState([]);
+
+    const loggedInUser = JSON.parse(localStorage.getItem('user'));
+    const loggedInUserId = loggedInUser.userId;
 
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -71,17 +74,6 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
         );
         setFilteredModals(filtered);
     };
-
-
-    useEffect(() => {
-        // Get user from local storage
-        const loggedInUser = JSON.parse(localStorage.getItem('user'));
-        if (loggedInUser) {
-            setLoggedInUserId(loggedInUser.userId);
-            // console.log(loggedInUser  ${loggedInUserId});
-        }
-    }, []); // Empty dependency array to run only once on mount
-
 
     // console.log('Fetched Products:', products);
     const addProductFormRef = useRef(null);
@@ -133,7 +125,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
     const [payment, setPayment] = useState('');
     const [warrantyOrSupport, setWarrantyOrSupport] = useState('');
     const [transport, setTransport] = useState('');
-    const [validity, setValidity] = useState(0);
+    const [validity, setValidity] = useState(1);
 
     // const [NticketId, setNticketId] = useState(null);
     const NticketId = useRef(null);
@@ -150,7 +142,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
             }
             dispatch(fetchNonCustProducts()); // Fetch products when the modal is visible
         }
-    }, [dispatch, visible, customers]);
+    }, [visible]);
 
     useEffect(() => {
         if (error) {
@@ -274,6 +266,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
     }, [visible]); // Dependencies for the useEffect hook
 
 
+    // console.log(defaultCustomer);
 
 
     const handleProductSelect = async (value) => {
@@ -432,34 +425,15 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                 await dispatch(updateTicket({ ticketId: NticketId.current, data: values }));
             }
 
+            if (customer === null) {
+                // console.log('wait');
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+            }
+
             // Create new products
             const addedProductIds = []; // Array to hold product IDs to be added to quotationProducts
             const productPromises = addedProducts.map(async (product) => {
-                let customerValid = false; // Flag to track customer validity
-
-                // Check customer validity repeatedly until valid or a timeout occurs (optional)
-                const maxAttempts = 5; // Example: Try up to 5 times
-                let attempts = 0;
-
-                while (!customerValid && attempts < maxAttempts) {
-                    // Re-fetch or re-check customer data here.  How you do this depends on your setup.
-                    // Example 1: If 'customer' is a variable that might be updated:
-                    if (customer !== null) {
-                        customerValid = true;
-                    }
-
-                    if (!customerValid) {
-                        attempts++;
-                        console.log("Customer not yet available. Retrying...");
-                        // await new Promise(resolve => setTimeout(resolve, 500)); // Small delay before retrying (optional)
-                    }
-                }
-
-                if (!customerValid) {
-                    console.error("Customer data not found after multiple attempts. Skipping product.");
-                    //   return null; // Or throw an error if you want to stop processing
-                }
-
+                
                 const newProductData = {
                     brand: product.brand,
                     modelNo: product.modelNo,
@@ -473,7 +447,7 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                     gst: product.gst,
                     warrantyMonths: product.warranty,
                     productType: product.productType === 'ServiceF' ? 'Service' : product.productType,
-                    customerId: customer.customerId || customerResponse // Now 'customer' is guaranteed to be valid
+                    customerId: customer.customerId || defaultCustomer// Now 'customer' is guaranteed to be valid
                 };
 
                 const addedProduct = await dispatch(addProduct(newProductData)).unwrap();
@@ -483,17 +457,13 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
 
 
             const addedProductsResponse = await Promise.all(productPromises);
-            // console.log(addedProductsResponse);
-            // console.log(addedProductIds);
-            // console.log(NticketId.current.value);
-
-            // Create a new quotation
+          
             const quotationData = {
                 ticketId: NticketId !== null ? NticketId.current : defticketId,
                 customerId: customerId,
                 status: 'Pending',
                 createdBy: loggedInUserId,
-                createdDate: currentDate.format('YYYY-MM-DD HH:mm:ss'),
+                quotationDate: currentDate.format('YYYY-MM-DDTHH:mm:ss'),
                 comments: comment,
                 taxes,
                 delivery,
@@ -504,30 +474,14 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
             };
 
             const quotationResponse = await dispatch(updateQuotation({ quotationId: Quote.current.quotationId, data: quotationData })).unwrap();
-            // console.log('Quotation updated:', quotationResponse);
-
-            // Create entries in quotationProducts table for each product
-            // const quotationProductPromises = addedProductIds.map(async (productId, index) => {
-            //     const quotationProductsData = {
-            //         quotationId: quotationResponse.quotationId, // Use the ID from the created or updated quotation
-            //         productId: productId,
-            //     };
-
-            //     // Adding a delay of 0.5 second before each API call
-            //     if (index > 0) await sleep(500);
-
-            //     // console.log('Adding quotation product:', quotationProductsData);
-            //     const quotationProductResponse = await dispatch(addQuotaionProduct(quotationProductsData)).unwrap();
-            //     return quotationProductResponse;
-            // });
-
+          
             const quotationProductsData = addedProductIds.map((productId) => ({
-                quotationId: quotationResponse.quotationId, 
+                quotationId: quotationResponse.quotationId,
                 productId: productId
             }));
-            
+
             const quotationProductResponse = await dispatch(addQuotaionProduct(quotationProductsData)).unwrap();
-            
+
 
             // const quotationProductsResponses = await Promise.all(quotationProductResponse);
             // console.log('Quotation products added:', quotationProductsResponses);
@@ -863,17 +817,17 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                                 </Form.Item>
                             </Col>
                             {/* {productType === 'Hardware' && ( */}
-                                <Col span={8}>
-                                    <Form.Item label="Quantity"
-                                        rules={[{ required: true }]}
-                                    >
-                                        <Input
-                                            type="number"
-                                            value={newProduct.quantity}
-                                            onChange={e => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
-                                        />
-                                    </Form.Item>
-                                </Col>
+                            <Col span={8}>
+                                <Form.Item label="Quantity"
+                                    rules={[{ required: true }]}
+                                >
+                                    <Input
+                                        type="number"
+                                        value={newProduct.quantity}
+                                        onChange={e => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
+                                    />
+                                </Form.Item>
+                            </Col>
 
 
 
@@ -977,8 +931,39 @@ const QuotationFormModal = ({ visible, onClose, defticketId, defaultCustomer }) 
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Validity (days)" rules={[{ required: true, message: 'Please input validity!' }]}>
-                                <Input type="number" value={validity} onChange={e => setValidity(parseInt(e.target.value))} />
+                            <Form.Item
+                                label="Validity (days)"
+                                rules={[
+                                    { required: true, message: 'Please input validity!' },
+                                    {
+                                        validator: (_, value) => {
+                                            if (value === undefined || value === null || value === '') {
+                                                return Promise.reject(new Error('Please input validity!'));
+                                            }
+                                            if (value < 1) {
+                                                return Promise.reject(new Error('Validity must be at least 1 day!'));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    type="number"
+                                    value={validity}
+                                    onChange={(e) => {
+                                        const newValue = e.target.value;
+                                        if (newValue === '') {
+                                            setValidity(''); // Allow clearing the input
+                                        } else {
+                                            const parsedValue = parseInt(newValue, 10);
+                                            if (!isNaN(parsedValue) && parsedValue >= 1) {
+                                                setValidity(parsedValue);
+                                            }
+                                        }
+                                    }}
+                                    min={1}
+                                />
                             </Form.Item>
                         </Col>
                     </Row>

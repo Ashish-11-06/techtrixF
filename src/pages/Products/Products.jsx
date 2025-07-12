@@ -24,7 +24,7 @@ const Products = () => {
 
     // Fetch products on mount
     useEffect(() => {
-        if(!products || products.length === 0) {
+        if (!products || products.length === 0) {
             dispatch(fetchNonCustProducts());
         }
     }, [dispatch]);
@@ -120,11 +120,11 @@ const Products = () => {
             key: 'description', // Corrected key
             width: 400,
         },
-        {
-            title: 'Price',
-            dataIndex: 'price',
-            key: 'price',
-        },
+        // {
+        //     title: 'Price',
+        //     dataIndex: 'price',
+        //     key: 'price',
+        // },
         {
             title: 'Actions',
             key: 'actions',
@@ -162,24 +162,24 @@ const Products = () => {
 
                     {/* Products Table */}
                     {loading ? (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-    <Spin tip="Loading...">
-      <div style={{ minHeight: '50px' }} />
-    </Spin>
-  </div>
-) : filteredProducts.length === 0 ? (
-  <Empty description="No Products Available" />
-) : (
-  <Table
-    dataSource={filteredProducts}
-    columns={columns}
-    rowKey="id"
-    pagination={{
-      pageSize: 10, // Number of items per page
-      showSizeChanger: false, // Disable size changer
-    }}
-  />
-)}
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                            <Spin tip="Loading...">
+                                <div style={{ minHeight: '50px' }} />
+                            </Spin>
+                        </div>
+                    ) : filteredProducts.length === 0 ? (
+                        <Empty description="No Products Available" />
+                    ) : (
+                        <Table
+                            dataSource={filteredProducts}
+                            columns={columns}
+                            rowKey="id"
+                            pagination={{
+                                pageSize: 10, // Number of items per page
+                                showSizeChanger: false, // Disable size changer
+                            }}
+                        />
+                    )}
 
 
                     {/* Product Details Modal */}
@@ -196,7 +196,7 @@ const Products = () => {
                         visible={isCreateModalVisible}
                         onCancel={() => setCreateModalVisible(false)}
                         onAddProduct={handleCreateProduct}
-                       
+
                     />
 
                     {/* Edit Product Modal */}

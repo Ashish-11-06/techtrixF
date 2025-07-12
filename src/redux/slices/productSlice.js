@@ -215,6 +215,7 @@ const productSlice = createSlice({
         state.error = null;
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
+        state.nonCustomerProducts = state.nonCustomerProducts.map(item => item.productId === action.payload.productId ? action.payload : item);
         state.items = state.items.map(item => item.productId === action.payload.productId ? action.payload : item);
         state.products = state.products.map(product => product.productId === action.payload.productId ? action.payload : product);
         state.product = action.payload; // Update the state of the product
